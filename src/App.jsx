@@ -49,6 +49,40 @@ function buildSnapshots() {
 
 const SNAPSHOTS = buildSnapshots();
 
+// ─── BENCHMARK DATA ──────────────────────────────────────────────────────────
+const BENCHMARKS = {
+  sp500:    { label:'S&P 500',      color:'#f97316', data:[100,104,101,108,115,112,120,126,123,132,138,142] },
+  msci:     { label:'MSCI World',   color:'#a855f7', data:[100,103,100,106,112,109,117,122,119,127,133,136] },
+  nasdaq:   { label:'Nasdaq 100',   color:'#00c2ff', data:[100,107,103,114,125,118,132,141,136,152,162,168] },
+  gold:     { label:'Gold',         color:'#ffd166', data:[100,102,104,103,106,108,107,110,112,111,114,116] },
+  btc:      { label:'Bitcoin',      color:'#f59e0b', data:[100,118,95,130,158,142,175,190,165,210,235,248] },
+  eth:      { label:'Ethereum',     color:'#6366f1', data:[100,115,90,125,150,135,168,182,158,198,220,235] },
+  sp500val: { label:'S&P Value',    color:'#10b981', data:[100,102,100,104,108,106,110,113,111,116,119,121] },
+  eurostoxx:{ label:'Euro Stoxx 50',color:'#ec4899', data:[100,103,101,105,110,107,112,116,113,119,123,125] },
+  bonds:    { label:'Bond Agg',     color:'#6b7799', data:[100,101,99,100,101,100,101,102,101,102,103,103] },
+  realestate:{ label:'Real Estate', color:'#84cc16', data:[100,101,99,102,105,103,107,109,107,111,113,114] },
+  emerging: { label:'Emerging Mkt', color:'#14b8a6', data:[100,105,99,108,116,110,119,125,120,130,136,139] },
+  vwce:     { label:'VWCE',         color:'#8b5cf6', data:[100,103,100,106,112,108,117,122,118,127,132,135] },
+};
+
+const DEFAULT_BENCHMARKS = ["msci", "sp500", "nasdaq", "gold"];
+
+function buildBenchmarkSeries(snapshots) {
+  const base = snapshots[0]?.value || 28000;
+  return snapshots.map((s, i) => {
+    const portPct = ((s.value - base) / base * 100);
+    return {
+      date: s.date,
+      portafoglio: parseFloat(portPct.toFixed(2)),
+      sp500:  parseFloat((BENCHMARKS.sp500.data[i]  - 100).toFixed(2)),
+      msci:   parseFloat((BENCHMARKS.msci.data[i]   - 100).toFixed(2)),
+      btc:    parseFloat((BENCHMARKS.btc.data[i]    - 100).toFixed(2)),
+      bonds:  parseFloat((BENCHMARKS.bonds.data[i]  - 100).toFixed(2)),
+    };
+  });
+}
+
+
 function filterSnapshots(snapshots, tf) {
   const n = snapshots.length;
   if (tf === "1M") return snapshots.slice(-1);
@@ -204,6 +238,17 @@ const NAV = [
 // ─── DASHBOARD PAGE ───────────────────────────────────────────────────────────
 function DashboardPage({ holdings }) {
   const [tf, setTf] = useState("1Y");
+  const [activeBenchmarks, setActiveBenchmarks] = useState(DEFAULT_BENCHMARKS);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const filteredSnapshots = useMemo(() => {
+    if (tf === "1M") return SNAPSHOTS.slice(-1);
+    if (tf === "3M") return SNAPSHOTS.slice(-3);
+    if (tf === "6M") return SNAPSHOTS.slice(-6);
+    return SNAPSHOTS;
+  }, [tf]);
+
+  const benchSeries = useMemo(() => buildBenchmarkSeries(filteredSnapshots), [filteredSnapshots]);
 
   const totalCurrent  = holdings.reduce((s,h) => s + h.current, 0);
   const totalInvested = holdings.reduce((s,h) => s + h.invested, 0);
@@ -236,14 +281,6 @@ function DashboardPage({ holdings }) {
       name, value, pct: (value / totalCurrent) * 100, color: SECTOR_COLORS[i]
     }));
   }, [holdings, totalCurrent]);
-
-  // filtered snapshots based on timeframe
-  const filteredSnapshots = useMemo(() => {
-    if (tf === '1M') return SNAPSHOTS.slice(-1);
-    if (tf === '3M') return SNAPSHOTS.slice(-3);
-    if (tf === '6M') return SNAPSHOTS.slice(-6);
-    return SNAPSHOTS;
-  }, [tf]);
 
   return (
     <div>
@@ -297,14 +334,191 @@ function DashboardPage({ holdings }) {
           sub={`su ${fmtEur(totalInvested)} investiti`} subColor={clr(totalPL)} icon="⊕"/>
       </div>
 
-      {/* main chart + allocation */}
+      {/* BENCHMARK COMPARISON CHART */}
+      <div style={{ background:T.card, borderRadius:20, padding:"28px",
+        border:`1px solid ${T.border}`, marginBottom:16 }}>
+        
+        {/* header row */}
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:20, flexWrap:"wrap", gap:12 }}>
+          <div>
+            <div style={{ fontWeight:800, fontSize:18, letterSpacing:"-0.02em", marginBottom:4 }}>
+              Benchmark Comparison
+            </div>
+            <div style={{ color:T.muted2, fontSize:12 }}>Portafoglio vs indici di mercato — rendimento %</div>
+          </div>
+          <div style={{ display:"flex", gap:10, alignItems:"center", flexWrap:"wrap" }}>
+            {/* active benchmark pills + dropdown */}
+            <div style={{ display:"flex", gap:6, flexWrap:"wrap", alignItems:"center" }}>
+              {activeBenchmarks.map(key => {
+                const b = BENCHMARKS[key];
+                if (!b) return null;
+                return (
+                  <div key={key} style={{
+                    background:`${b.color}22`, color:b.color,
+                    border:`1px solid ${b.color}55`,
+                    borderRadius:8, padding:"5px 10px", fontSize:11, fontWeight:700,
+                    display:"flex", alignItems:"center", gap:6
+                  }}>
+                    <span style={{ width:8,height:8,borderRadius:"50%",background:b.color,display:"inline-block" }}/>
+                    {b.label}
+                    <button onClick={()=>setActiveBenchmarks(p=>p.filter(k=>k!==key))}
+                      style={{ background:"none", border:"none", color:b.color,
+                        cursor:"pointer", fontSize:13, lineHeight:1, padding:"0 0 0 2px", fontWeight:900 }}>×</button>
+                  </div>
+                );
+              })}
+
+              {/* add benchmark dropdown */}
+              <div style={{ position:"relative" }}>
+                <button onClick={()=>setDropdownOpen(o=>!o)} style={{
+                  background: dropdownOpen ? `${T.accent}22` : T.surface,
+                  color: dropdownOpen ? T.accent : T.muted2,
+                  border:`1px solid ${dropdownOpen ? T.accent+"44" : T.border}`,
+                  borderRadius:8, padding:"5px 12px", cursor:"pointer",
+                  fontSize:11, fontWeight:700, display:"flex", alignItems:"center", gap:6
+                }}>
+                  ＋ Aggiungi indice
+                  <span style={{ fontSize:9, opacity:0.7 }}>{dropdownOpen?"▲":"▼"}</span>
+                </button>
+
+                {dropdownOpen && (
+                  <div style={{
+                    position:"absolute", top:"calc(100% + 6px)", right:0, zIndex:200,
+                    background:T.card, border:`1px solid ${T.border2}`,
+                    borderRadius:14, padding:"8px", minWidth:220,
+                    boxShadow:"0 16px 48px #000d",
+                    display:"flex", flexDirection:"column", gap:2
+                  }}>
+                    <div style={{ color:T.muted, fontSize:10, fontWeight:700,
+                      textTransform:"uppercase", letterSpacing:"0.1em",
+                      padding:"4px 8px 8px" }}>Seleziona indice</div>
+                    {Object.entries(BENCHMARKS).map(([key, b]) => {
+                      const active = activeBenchmarks.includes(key);
+                      return (
+                        <button key={key}
+                          onClick={()=>{
+                            setActiveBenchmarks(p => active ? p.filter(k=>k!==key) : [...p, key]);
+                          }}
+                          style={{
+                            background: active ? `${b.color}18` : "transparent",
+                            color: active ? b.color : T.text,
+                            border:`1px solid ${active ? b.color+"33" : "transparent"}`,
+                            borderRadius:8, padding:"9px 12px", cursor:"pointer",
+                            fontSize:12, fontWeight: active ? 700 : 500,
+                            textAlign:"left", display:"flex", alignItems:"center",
+                            justifyContent:"space-between", gap:10, transition:"all .1s"
+                          }}>
+                          <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                            <span style={{ width:10,height:10,borderRadius:3,
+                              background:b.color,display:"inline-block",flexShrink:0 }}/>
+                            {b.label}
+                          </div>
+                          {active && <span style={{ fontSize:14, fontWeight:900 }}>✓</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+            <TimeframeSelector value={tf} onChange={setTf}/>
+          </div>
+        </div>
+
+        {/* stat pills */}
+        <div style={{ display:"flex", gap:10, marginBottom:20, flexWrap:"wrap" }}>
+          {[
+            { label:"Il tuo portafoglio", color:T.accent,
+              val: benchSeries.length ? `+${benchSeries[benchSeries.length-1].portafoglio.toFixed(1)}%` : "—" },
+            ...Object.entries(BENCHMARKS)
+              .filter(([k])=>activeBenchmarks.includes(k))
+              .map(([k,b]) => ({
+                label: b.label, color: b.color,
+                val: benchSeries.length ? `+${benchSeries[benchSeries.length-1][k]?.toFixed(1)||0}%` : "—"
+              }))
+          ].map(item => (
+            <div key={item.label} style={{
+              background: `${item.color}12`,
+              border: `1px solid ${item.color}33`,
+              borderRadius:10, padding:"8px 14px",
+              display:"flex", alignItems:"center", gap:8
+            }}>
+              <div style={{ width:10, height:10, borderRadius:3, background:item.color }}/>
+              <span style={{ color:T.muted2, fontSize:11 }}>{item.label}</span>
+              <span style={{ color:item.color, fontWeight:800, fontSize:14 }}>{item.val}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* main line chart */}
+        <ResponsiveContainer width="100%" height={280}>
+          <LineChart data={benchSeries} margin={{ top:5, right:10, left:0, bottom:0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={T.border} vertical={false}/>
+            <XAxis dataKey="date" tick={{ fill:T.muted, fontSize:11 }} axisLine={false} tickLine={false}/>
+            <YAxis tick={{ fill:T.muted, fontSize:11 }} axisLine={false} tickLine={false}
+              tickFormatter={v => v+"%"} width={46}/>
+            <ReferenceLine y={0} stroke={T.muted2} strokeDasharray="4 4" strokeWidth={1}/>
+            <Tooltip
+              contentStyle={{ background:T.card, border:`1px solid ${T.border2}`, borderRadius:12,
+                boxShadow:"0 8px 32px #000c", padding:"12px 16px" }}
+              labelStyle={{ color:T.muted2, fontSize:11, marginBottom:6 }}
+              formatter={(val, name) => [
+                <span style={{ fontWeight:800 }}>{val > 0 ? "+" : ""}{val}%</span>,
+                name === "portafoglio" ? "Il tuo portafoglio" : BENCHMARKS[name]?.label || name
+              ]}
+            />
+            {/* portafoglio — always shown, thicker */}
+            <Line type="monotone" dataKey="portafoglio" stroke={T.accent}
+              strokeWidth={3} dot={false} name="portafoglio"
+              strokeDasharray={undefined}/>
+            {/* benchmarks */}
+            {activeBenchmarks.map(key => (
+              <Line key={key} type="monotone" dataKey={key}
+                stroke={BENCHMARKS[key].color} strokeWidth={1.5}
+                dot={false} strokeDasharray="5 3" name={key}/>
+            ))}
+          </LineChart>
+        </ResponsiveContainer>
+
+        {/* outperformance summary */}
+        <div style={{ display:"flex", gap:10, marginTop:16, flexWrap:"wrap" }}>
+          {Object.entries(BENCHMARKS)
+            .filter(([k]) => activeBenchmarks.includes(k))
+            .map(([key, b]) => {
+              const last = benchSeries[benchSeries.length-1];
+              if (!last) return null;
+              const diff = (last.portafoglio - (last[key]||0));
+              const beating = diff > 0;
+              return (
+                <div key={key} style={{
+                  background: beating ? `${T.green}10` : `${T.red}10`,
+                  border: `1px solid ${beating ? T.green : T.red}33`,
+                  borderRadius:10, padding:"10px 16px", flex:1, minWidth:140
+                }}>
+                  <div style={{ color:T.muted2, fontSize:10, fontWeight:700,
+                    textTransform:"uppercase", letterSpacing:"0.08em", marginBottom:4 }}>
+                    vs {b.label}
+                  </div>
+                  <div style={{ color: beating ? T.green : T.red, fontWeight:900, fontSize:18 }}>
+                    {beating?"+":""}{diff.toFixed(2)}%
+                  </div>
+                  <div style={{ color:T.muted2, fontSize:11, marginTop:2 }}>
+                    {beating ? "🏆 Stai battendo l'indice" : "📉 Sotto la media"}
+                  </div>
+                </div>
+              );
+            })
+          }
+        </div>
+      </div>
+
+      {/* value chart + allocation */}
       <div style={{ display:"grid", gridTemplateColumns:"1fr 320px", gap:16, marginBottom:16 }}>
         {/* area chart */}
         <div style={{ background:T.card, borderRadius:20, padding:"24px",
           border:`1px solid ${T.border}` }}>
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
             <SectionHeader title="Valore Portafoglio" sub="Performance storica"/>
-            <TimeframeSelector value={tf} onChange={setTf}/>
           </div>
           <ResponsiveContainer width="100%" height={220}>
             <AreaChart data={filteredSnapshots} margin={{ top:5, right:10, left:0, bottom:0 }}>
