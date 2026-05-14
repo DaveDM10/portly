@@ -43,11 +43,22 @@ function buildSnapshots() {
   let v = 28000;
   return months.map((m, i) => {
     v *= (1 + (Math.random() * 0.08 - 0.02));
-    return { date: m, value: Math.round(v), pct: ((v - 28000) / 28000 * 100) };
+    return { date: m, value: Math.round(v), pct: ((v - 28000) / 28000 * 100), monthIndex: i };
   });
 }
 
 const SNAPSHOTS = buildSnapshots();
+
+function filterSnapshots(snapshots, tf) {
+  const n = snapshots.length;
+  if (tf === "1M") return snapshots.slice(-1);
+  if (tf === "3M") return snapshots.slice(-3);
+  if (tf === "6M") return snapshots.slice(-6);
+  if (tf === "YTD") return snapshots; // same as full year in demo
+  if (tf === "1Y") return snapshots;
+  if (tf === "MAX") return snapshots;
+  return snapshots;
+}
 
 const TRANSACTIONS = [
   { id:1, date:"2024-01-10", type:"buy",      ticker:"AAPL",  name:"Apple Inc.",        qty:15,   price:148.50, fees:1.50,  total:2229.00,  currency:"USD" },
@@ -226,11 +237,13 @@ function DashboardPage({ holdings }) {
     }));
   }, [holdings, totalCurrent]);
 
-  // drawdown simulation
-  const drawdown = SNAPSHOTS.map((s, i) => ({
-    date: s.date,
-    dd: -(Math.random() * 8).toFixed(2)
-  }));
+  // filtered snapshots based on timeframe
+  const filteredSnapshots = useMemo(() => {
+    if (tf === '1M') return SNAPSHOTS.slice(-1);
+    if (tf === '3M') return SNAPSHOTS.slice(-3);
+    if (tf === '6M') return SNAPSHOTS.slice(-6);
+    return SNAPSHOTS;
+  }, [tf]);
 
   return (
     <div>
@@ -294,7 +307,7 @@ function DashboardPage({ holdings }) {
             <TimeframeSelector value={tf} onChange={setTf}/>
           </div>
           <ResponsiveContainer width="100%" height={220}>
-            <AreaChart data={SNAPSHOTS} margin={{ top:5, right:10, left:0, bottom:0 }}>
+            <AreaChart data={filteredSnapshots} margin={{ top:5, right:10, left:0, bottom:0 }}>
               <defs>
                 <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor={T.accent} stopOpacity={0.25}/>
