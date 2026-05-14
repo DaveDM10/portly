@@ -1,2 +1,0 @@
-# portly
-Investment portfolio tracker
