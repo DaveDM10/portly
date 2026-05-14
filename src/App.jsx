@@ -38,47 +38,126 @@ const ASSETS = [
   { id:8, ticker:"EUR",   name:"Cash EUR",              type:"Cash",   sector:"Cash",         geo:"Europe", currency:"EUR", quantity:2800, avgCost:1,      price:1,      color:"#00e5a0" },
 ];
 
+// 5 anni di storico realistico — PAC mensile + mercato
+const SNAPSHOTS_5Y = [
+  // 2020
+  { date:"Mar '20", value:4800  },{ date:"Apr '20", value:5600  },{ date:"Mag '20", value:6300  },
+  { date:"Giu '20", value:7100  },{ date:"Lug '20", value:7900  },{ date:"Ago '20", value:9200  },
+  { date:"Set '20", value:8800  },{ date:"Ott '20", value:9400  },{ date:"Nov '20", value:11200 },
+  { date:"Dic '20", value:12800 },
+  // 2021
+  { date:"Gen '21", value:14200 },{ date:"Feb '21", value:15600 },{ date:"Mar '21", value:17100 },
+  { date:"Apr '21", value:19400 },{ date:"Mag '21", value:18200 },{ date:"Giu '21", value:19800 },
+  { date:"Lug '21", value:21200 },{ date:"Ago '21", value:23400 },{ date:"Set '21", value:22100 },
+  { date:"Ott '21", value:25600 },{ date:"Nov '21", value:28900 },{ date:"Dic '21", value:27400 },
+  // 2022 — bear market
+  { date:"Gen '22", value:25800 },{ date:"Feb '22", value:24200 },{ date:"Mar '22", value:23600 },
+  { date:"Apr '22", value:21400 },{ date:"Mag '22", value:19800 },{ date:"Giu '22", value:18200 },
+  { date:"Lug '22", value:20100 },{ date:"Ago '22", value:21400 },{ date:"Set '22", value:19600 },
+  { date:"Ott '22", value:21200 },{ date:"Nov '22", value:20400 },{ date:"Dic '22", value:19800 },
+  // 2023 — ripresa
+  { date:"Gen '23", value:21600 },{ date:"Feb '23", value:22800 },{ date:"Mar '23", value:24200 },
+  { date:"Apr '23", value:25800 },{ date:"Mag '23", value:27400 },{ date:"Giu '23", value:29200 },
+  { date:"Lug '23", value:31000 },{ date:"Ago '23", value:30200 },{ date:"Set '23", value:29400 },
+  { date:"Ott '23", value:28800 },{ date:"Nov '23", value:31600 },{ date:"Dic '23", value:34200 },
+  // 2024 — bull run
+  { date:"Gen '24", value:36400 },{ date:"Feb '24", value:38800 },{ date:"Mar '24", value:41200 },
+  { date:"Apr '24", value:39600 },{ date:"Mag '24", value:42800 },{ date:"Giu '24", value:44600 },
+  { date:"Lug '24", value:46200 },{ date:"Ago '24", value:48800 },{ date:"Set '24", value:47400 },
+  { date:"Ott '24", value:50200 },{ date:"Nov '24", value:54800 },{ date:"Dic '24", value:57200 },
+];
+
 function buildSnapshots() {
   const months = ["Gen","Feb","Mar","Apr","Mag","Giu","Lug","Ago","Set","Ott","Nov","Dic"];
-  let v = 28000;
-  return months.map((m, i) => {
-    v *= (1 + (Math.random() * 0.08 - 0.02));
-    return { date: m, value: Math.round(v), pct: ((v - 28000) / 28000 * 100), monthIndex: i };
-  });
+  // Last 12 months from the 5Y data
+  return SNAPSHOTS_5Y.slice(-12).map((s,i) => ({
+    ...s,
+    date: months[i],
+    pct: ((s.value - SNAPSHOTS_5Y.slice(-12)[0].value) / SNAPSHOTS_5Y.slice(-12)[0].value * 100),
+    monthIndex: i
+  }));
 }
 
 const SNAPSHOTS = buildSnapshots();
 
 // ─── BENCHMARK DATA ──────────────────────────────────────────────────────────
 const BENCHMARKS = {
-  sp500:     { label:'S&P 500',      color:'#f97316', isin:'IE00B5BMR087', desc:'500 maggiori aziende USA quotate al NYSE/NASDAQ. Il benchmark azionario più seguito al mondo.', data:[100,104,101,108,115,112,120,126,123,132,138,142] },
-  msci:      { label:'MSCI World',   color:'#a855f7', isin:'IE00B4L5Y983', desc:'1.400+ aziende in 23 paesi sviluppati. Copre circa l'85% della capitalizzazione mondiale.', data:[100,103,100,106,112,109,117,122,119,127,133,136] },
-  nasdaq:    { label:'Nasdaq 100',   color:'#00c2ff', isin:'IE0032077012',  desc:'100 maggiori aziende non-finanziarie del Nasdaq. Alto peso su tech (Apple, Microsoft, Nvidia).', data:[100,107,103,114,125,118,132,141,136,152,162,168] },
-  gold:      { label:'Gold',         color:'#ffd166', isin:'IE00B579F325', desc:'Oro fisico. Bassa correlazione con azioni, usato come riserva di valore e hedging.', data:[100,102,104,103,106,108,107,110,112,111,114,116] },
-  btc:       { label:'Bitcoin',      color:'#f59e0b', isin:'N/A — spot',   desc:'Prima criptovaluta per capitalizzazione. Alta volatilità, bassa correlazione con asset tradizionali.', data:[100,118,95,130,158,142,175,190,165,210,235,248] },
-  eth:       { label:'Ethereum',     color:'#6366f1', isin:'N/A — spot',   desc:'Seconda crypto per capitalizzazione. Piattaforma smart contract, base del settore DeFi/NFT.', data:[100,115,90,125,150,135,168,182,158,198,220,235] },
-  sp500val:  { label:'S&P Value',    color:'#10b981', isin:'IE00B3VVMM84', desc:'Azioni S&P 500 a basso P/E (valore). Tende a sovraperformare in fasi di rialzo dei tassi.', data:[100,102,100,104,108,106,110,113,111,116,119,121] },
-  eurostoxx: { label:'Euro Stoxx 50',color:'#ec4899', isin:'IE00B53L3W79', desc:'50 blue chip dell'Eurozona. Esposizione a Francia, Germania, Spagna, Italia e altri.', data:[100,103,101,105,110,107,112,116,113,119,123,125] },
-  bonds:     { label:'Bond Agg',     color:'#6b7799', isin:'IE00B3F81409', desc:'Obbligazioni globali investment grade. Bassa volatilità, utile per diversificare il rischio.', data:[100,101,99,100,101,100,101,102,101,102,103,103] },
-  realestate:{ label:'Real Estate',  color:'#84cc16', isin:'IE00B1FZS244', desc:'REIT globali — immobiliare quotato. Buona fonte di dividendi, correlato ai tassi di interesse.', data:[100,101,99,102,105,103,107,109,107,111,113,114] },
-  emerging:  { label:'Emerging Mkt', color:'#14b8a6', isin:'IE00B4L5YC18', desc:'Mercati emergenti (Cina, India, Brasile…). Alto potenziale, alta volatilità e rischio geopolitico.', data:[100,105,99,108,116,110,119,125,120,130,136,139] },
-  vwce:      { label:'VWCE',         color:'#8b5cf6', isin:'IE00BK5BQT80', desc:'Vanguard FTSE All-World. ~3.700 aziende in paesi sviluppati ed emergenti. ETF per eccellenza del lazy investing.', data:[100,103,100,106,112,108,117,122,118,127,132,135] },
+  sp500:     { label:"S&P 500",      color:"#f97316", isin:"IE00B5BMR087", desc:"500 maggiori aziende USA quotate al NYSE/NASDAQ. Il benchmark azionario piu seguito al mondo.",         data:[100,104,101,108,115,112,120,126,123,132,138,142] },
+  msci:      { label:"MSCI World",   color:"#a855f7", isin:"IE00B4L5Y983", desc:"1.400+ aziende in 23 paesi sviluppati. Copre circa l85% della capitalizzazione mondiale.",              data:[100,103,100,106,112,109,117,122,119,127,133,136] },
+  nasdaq:    { label:"Nasdaq 100",   color:"#00c2ff", isin:"IE0032077012",  desc:"100 maggiori aziende non-finanziarie del Nasdaq. Alto peso su tech: Apple, Microsoft, Nvidia.",         data:[100,107,103,114,125,118,132,141,136,152,162,168] },
+  gold:      { label:"Gold",         color:"#ffd166", isin:"IE00B579F325", desc:"Oro fisico. Bassa correlazione con azioni, usato come riserva di valore e hedging inflazione.",          data:[100,102,104,103,106,108,107,110,112,111,114,116] },
+  btc:       { label:"Bitcoin",      color:"#f59e0b", isin:"N/A - spot",   desc:"Prima criptovaluta per capitalizzazione. Alta volatilita, bassa correlazione con asset tradizionali.", data:[100,118,95,130,158,142,175,190,165,210,235,248] },
+  eth:       { label:"Ethereum",     color:"#6366f1", isin:"N/A - spot",   desc:"Seconda crypto per capitalizzazione. Piattaforma smart contract, base del settore DeFi e NFT.",        data:[100,115,90,125,150,135,168,182,158,198,220,235] },
+  sp500val:  { label:"S&P Value",    color:"#10b981", isin:"IE00B3VVMM84", desc:"Azioni S&P 500 a basso P/E. Tende a sovraperformare in fasi di rialzo dei tassi di interesse.",         data:[100,102,100,104,108,106,110,113,111,116,119,121] },
+  eurostoxx: { label:"Euro Stoxx 50",color:"#ec4899", isin:"IE00B53L3W79", desc:"50 blue chip dell'Eurozona. Esposizione a Francia, Germania, Spagna, Italia e altri paesi EU.",         data:[100,103,101,105,110,107,112,116,113,119,123,125] },
+  bonds:     { label:"Bond Agg",     color:"#6b7799", isin:"IE00B3F81409", desc:"Obbligazioni globali investment grade. Bassa volatilita, utile per diversificare il rischio azionario.",data:[100,101,99,100,101,100,101,102,101,102,103,103] },
+  realestate:{ label:"Real Estate",  color:"#84cc16", isin:"IE00B1FZS244", desc:"REIT globali - immobiliare quotato. Buona fonte di dividendi, correlato ai tassi di interesse.",        data:[100,101,99,102,105,103,107,109,107,111,113,114] },
+  emerging:  { label:"Emerging Mkt", color:"#14b8a6", isin:"IE00B4L5YC18", desc:"Mercati emergenti: Cina, India, Brasile. Alto potenziale di crescita, alta volatilita e rischio.",      data:[100,105,99,108,116,110,119,125,120,130,136,139] },
+  vwce:      { label:"VWCE",         color:"#8b5cf6", isin:"IE00BK5BQT80", desc:"Vanguard FTSE All-World. 3.700+ aziende in paesi sviluppati ed emergenti. ETF del lazy investing.",     data:[100,103,100,106,112,108,117,122,118,127,132,135] },
 };
 
 const DEFAULT_BENCHMARKS = ["msci", "sp500", "nasdaq", "gold"];
 
-function buildBenchmarkSeries(snapshots) {
+// ─── COINGECKO LIVE DATA HOOK ─────────────────────────────────────────────────
+function useCryptoPrices() {
+  const [cryptoData, setCryptoData] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState(null);
+
+  const fetchPrices = async () => {
+    try {
+      const [histBtc, histEth] = await Promise.all([
+        fetch("https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=eur&days=365&interval=monthly"),
+        fetch("https://api.coingecko.com/api/v3/coins/ethereum/market_chart?vs_currency=eur&days=365&interval=monthly"),
+      ]);
+      const btcJson = await histBtc.json();
+      const ethJson = await histEth.json();
+
+      const normalize = (prices) => {
+        if (!prices || prices.length < 2) return null;
+        const base = prices[0][1];
+        return prices.slice(0, 12).map(([ts, price]) => parseFloat(((price - base) / base * 100).toFixed(2)));
+      };
+
+      const btcNorm = normalize(btcJson.prices);
+      const ethNorm = normalize(ethJson.prices);
+
+      // Also fetch current prices
+      const spotRes = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=eur&include_24hr_change=true");
+      const spotJson = await spotRes.json();
+
+      setCryptoData({
+        btcHistory: btcNorm,
+        ethHistory: ethNorm,
+        btcPrice: spotJson?.bitcoin?.eur,
+        ethPrice: spotJson?.ethereum?.eur,
+        btcChange: spotJson?.bitcoin?.eur_24h_change,
+        ethChange: spotJson?.ethereum?.eur_24h_change,
+      });
+      setLastUpdated(new Date());
+    } catch (e) {
+      console.warn("CoinGecko fetch failed:", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useState(() => { fetchPrices(); }, []);
+
+  return { cryptoData, loading, lastUpdated, refetch: fetchPrices };
+}
+
+function buildBenchmarkSeries(snapshots, benchMap) {
+  const bm = benchMap || BENCHMARKS;
   const base = snapshots[0]?.value || 28000;
   return snapshots.map((s, i) => {
     const portPct = ((s.value - base) / base * 100);
-    return {
-      date: s.date,
-      portafoglio: parseFloat(portPct.toFixed(2)),
-      sp500:  parseFloat((BENCHMARKS.sp500.data[i]  - 100).toFixed(2)),
-      msci:   parseFloat((BENCHMARKS.msci.data[i]   - 100).toFixed(2)),
-      btc:    parseFloat((BENCHMARKS.btc.data[i]    - 100).toFixed(2)),
-      bonds:  parseFloat((BENCHMARKS.bonds.data[i]  - 100).toFixed(2)),
-    };
+    const row = { date: s.date, portafoglio: parseFloat(portPct.toFixed(2)) };
+    Object.keys(bm).forEach(key => {
+      const d = bm[key]?.data;
+      row[key] = d && d[i] != null ? parseFloat((d[i] - 100).toFixed(2)) : 0;
+    });
+    return row;
   });
 }
 
@@ -95,30 +174,127 @@ function filterSnapshots(snapshots, tf) {
 }
 
 const TRANSACTIONS = [
-  { id:1, date:"2024-01-10", type:"buy",      ticker:"AAPL",  name:"Apple Inc.",        qty:15,   price:148.50, fees:1.50,  total:2229.00,  currency:"USD" },
-  { id:2, date:"2024-01-15", type:"deposit",  ticker:"EUR",   name:"Cash Deposit",      qty:5000, price:1,      fees:0,     total:5000.00,  currency:"EUR" },
-  { id:3, date:"2024-02-01", type:"buy",      ticker:"VWCE",  name:"Vanguard FTSE",     qty:30,   price:95.20,  fees:2.00,  total:2858.00,  currency:"EUR" },
-  { id:4, date:"2024-02-14", type:"buy",      ticker:"BTC",   name:"Bitcoin",           qty:0.18, price:36500,  fees:12.00, total:6582.00,  currency:"USD" },
-  { id:5, date:"2024-03-05", type:"buy",      ticker:"MSFT",  name:"Microsoft",         qty:8,    price:295.00, fees:1.50,  total:2361.50,  currency:"USD" },
-  { id:6, date:"2024-04-01", type:"dividend", ticker:"AAPL",  name:"Apple Dividend",    qty:1,    price:24.00,  fees:0,     total:24.00,    currency:"USD" },
-  { id:7, date:"2024-04-20", type:"buy",      ticker:"ETH",   name:"Ethereum",          qty:1.5,  price:1980,   fees:8.00,  total:2978.00,  currency:"USD" },
-  { id:8, date:"2024-05-10", type:"buy",      ticker:"CSPX",  name:"iShares S&P500",    qty:12,   price:442.00, fees:2.00,  total:5306.00,  currency:"USD" },
-  { id:9, date:"2024-06-01", type:"sell",     ticker:"AAPL",  name:"Apple Inc.",        qty:2,    price:185.00, fees:1.50,  total:368.50,   currency:"USD" },
-  { id:10,date:"2024-07-15", type:"buy",      ticker:"XAUM",  name:"Gold ETC",          qty:20,   price:175.00, fees:1.50,  total:3501.50,  currency:"EUR" },
+  // ── 2020 — Inizio del viaggio ──────────────────────────────────────────────
+  { id:1,  date:"2020-03-20", type:"deposit",  ticker:"EUR",  name:"Primo deposito",        qty:5000,  price:1,       fees:0,     total:5000.00,  currency:"EUR" },
+  { id:2,  date:"2020-03-25", type:"buy",      ticker:"VWCE", name:"Vanguard FTSE",         qty:10,    price:62.40,   fees:1.50,  total:625.50,   currency:"EUR" },
+  { id:3,  date:"2020-04-10", type:"buy",      ticker:"AAPL", name:"Apple Inc.",            qty:5,     price:71.20,   fees:1.50,  total:357.50,   currency:"USD" },
+  { id:4,  date:"2020-05-15", type:"deposit",  ticker:"EUR",  name:"Deposito mensile",      qty:500,   price:1,       fees:0,     total:500.00,   currency:"EUR" },
+  { id:5,  date:"2020-05-20", type:"buy",      ticker:"VWCE", name:"Vanguard FTSE — PAC",   qty:5,     price:68.10,   fees:1.50,  total:342.00,   currency:"EUR" },
+  { id:6,  date:"2020-06-15", type:"deposit",  ticker:"EUR",  name:"Deposito mensile",      qty:500,   price:1,       fees:0,     total:500.00,   currency:"EUR" },
+  { id:7,  date:"2020-06-18", type:"buy",      ticker:"MSFT", name:"Microsoft Corp.",       qty:2,     price:196.50,  fees:1.50,  total:394.50,   currency:"USD" },
+  { id:8,  date:"2020-07-15", type:"deposit",  ticker:"EUR",  name:"Deposito mensile",      qty:500,   price:1,       fees:0,     total:500.00,   currency:"EUR" },
+  { id:9,  date:"2020-07-20", type:"buy",      ticker:"VWCE", name:"Vanguard FTSE — PAC",   qty:5,     price:72.30,   fees:1.50,  total:363.00,   currency:"EUR" },
+  { id:10, date:"2020-08-10", type:"buy",      ticker:"BTC",  name:"Bitcoin — primo acquisto",qty:0.05,price:10800,   fees:8.00,  total:548.00,   currency:"USD" },
+  { id:11, date:"2020-09-15", type:"deposit",  ticker:"EUR",  name:"Deposito mensile",      qty:500,   price:1,       fees:0,     total:500.00,   currency:"EUR" },
+  { id:12, date:"2020-09-18", type:"buy",      ticker:"VWCE", name:"Vanguard FTSE — PAC",   qty:5,     price:70.80,   fees:1.50,  total:355.50,   currency:"EUR" },
+  { id:13, date:"2020-10-20", type:"buy",      ticker:"AAPL", name:"Apple Inc.",            qty:5,     price:115.00,  fees:1.50,  total:576.50,   currency:"USD" },
+  { id:14, date:"2020-11-15", type:"deposit",  ticker:"EUR",  name:"Deposito mensile",      qty:500,   price:1,       fees:0,     total:500.00,   currency:"EUR" },
+  { id:15, date:"2020-11-20", type:"buy",      ticker:"VWCE", name:"Vanguard FTSE — PAC",   qty:5,     price:80.20,   fees:1.50,  total:402.50,   currency:"EUR" },
+  { id:16, date:"2020-12-10", type:"buy",      ticker:"BTC",  name:"Bitcoin — accumulo",    qty:0.03,  price:18500,   fees:5.00,  total:560.00,   currency:"USD" },
+  { id:17, date:"2020-12-20", type:"dividend", ticker:"AAPL", name:"Apple Dividendo Q4",    qty:1,     price:8.20,    fees:0,     total:8.20,     currency:"USD" },
+
+  // ── 2021 — Anno del toro ───────────────────────────────────────────────────
+  { id:18, date:"2021-01-15", type:"deposit",  ticker:"EUR",  name:"Deposito mensile",      qty:600,   price:1,       fees:0,     total:600.00,   currency:"EUR" },
+  { id:19, date:"2021-01-20", type:"buy",      ticker:"VWCE", name:"Vanguard FTSE — PAC",   qty:5,     price:84.60,   fees:1.50,  total:424.50,   currency:"EUR" },
+  { id:20, date:"2021-02-10", type:"buy",      ticker:"CSPX", name:"iShares S&P 500",       qty:3,     price:338.00,  fees:2.00,  total:1016.00,  currency:"USD" },
+  { id:21, date:"2021-02-20", type:"buy",      ticker:"ETH",  name:"Ethereum",              qty:0.5,   price:1480,    fees:5.00,  total:745.00,   currency:"USD" },
+  { id:22, date:"2021-03-15", type:"deposit",  ticker:"EUR",  name:"Deposito mensile",      qty:600,   price:1,       fees:0,     total:600.00,   currency:"EUR" },
+  { id:23, date:"2021-03-20", type:"buy",      ticker:"VWCE", name:"Vanguard FTSE — PAC",   qty:5,     price:87.40,   fees:1.50,  total:438.50,   currency:"EUR" },
+  { id:24, date:"2021-04-01", type:"dividend", ticker:"AAPL", name:"Apple Dividendo Q1",    qty:1,     price:8.50,    fees:0,     total:8.50,     currency:"USD" },
+  { id:25, date:"2021-04-15", type:"buy",      ticker:"MSFT", name:"Microsoft Corp.",       qty:2,     price:255.00,  fees:1.50,  total:511.50,   currency:"USD" },
+  { id:26, date:"2021-05-15", type:"deposit",  ticker:"EUR",  name:"Deposito mensile",      qty:600,   price:1,       fees:0,     total:600.00,   currency:"EUR" },
+  { id:27, date:"2021-05-20", type:"buy",      ticker:"VWCE", name:"Vanguard FTSE — PAC",   qty:5,     price:89.10,   fees:1.50,  total:447.00,   currency:"EUR" },
+  { id:28, date:"2021-06-10", type:"buy",      ticker:"BTC",  name:"Bitcoin — accumulo",    qty:0.05,  price:32000,   fees:10.00, total:1610.00,  currency:"USD" },
+  { id:29, date:"2021-07-15", type:"deposit",  ticker:"EUR",  name:"Deposito mensile",      qty:600,   price:1,       fees:0,     total:600.00,   currency:"EUR" },
+  { id:30, date:"2021-07-20", type:"buy",      ticker:"VWCE", name:"Vanguard FTSE — PAC",   qty:5,     price:92.30,   fees:1.50,  total:463.00,   currency:"EUR" },
+  { id:31, date:"2021-08-10", type:"buy",      ticker:"CSPX", name:"iShares S&P 500",       qty:3,     price:390.00,  fees:2.00,  total:1172.00,  currency:"USD" },
+  { id:32, date:"2021-09-15", type:"deposit",  ticker:"EUR",  name:"Deposito mensile",      qty:600,   price:1,       fees:0,     total:600.00,   currency:"EUR" },
+  { id:33, date:"2021-09-20", type:"buy",      ticker:"VWCE", name:"Vanguard FTSE — PAC",   qty:5,     price:91.00,   fees:1.50,  total:456.50,   currency:"EUR" },
+  { id:34, date:"2021-10-01", type:"dividend", ticker:"AAPL", name:"Apple Dividendo Q3",    qty:1,     price:8.80,    fees:0,     total:8.80,     currency:"USD" },
+  { id:35, date:"2021-10-15", type:"buy",      ticker:"ETH",  name:"Ethereum — accumulo",   qty:0.5,   price:3200,    fees:8.00,  total:1608.00,  currency:"USD" },
+  { id:36, date:"2021-11-10", type:"buy",      ticker:"BTC",  name:"Bitcoin — ATH zone",    qty:0.02,  price:58000,   fees:8.00,  total:1168.00,  currency:"USD" },
+  { id:37, date:"2021-11-15", type:"deposit",  ticker:"EUR",  name:"Deposito mensile",      qty:600,   price:1,       fees:0,     total:600.00,   currency:"EUR" },
+  { id:38, date:"2021-12-15", type:"buy",      ticker:"XAUM", name:"Gold ETC — hedge",      qty:10,    price:163.00,  fees:1.50,  total:1631.50,  currency:"EUR" },
+  { id:39, date:"2021-12-20", type:"buy",      ticker:"VWCE", name:"Vanguard FTSE — PAC",   qty:5,     price:95.80,   fees:1.50,  total:480.50,   currency:"EUR" },
+
+  // ── 2022 — Anno del bear market ────────────────────────────────────────────
+  { id:40, date:"2022-01-15", type:"deposit",  ticker:"EUR",  name:"Deposito mensile",      qty:700,   price:1,       fees:0,     total:700.00,   currency:"EUR" },
+  { id:41, date:"2022-01-20", type:"buy",      ticker:"VWCE", name:"Vanguard FTSE — PAC",   qty:6,     price:95.10,   fees:1.50,  total:572.10,   currency:"EUR" },
+  { id:42, date:"2022-02-15", type:"buy",      ticker:"XAUM", name:"Gold ETC — hedge",      qty:5,     price:170.00,  fees:1.50,  total:851.50,   currency:"EUR" },
+  { id:43, date:"2022-03-15", type:"deposit",  ticker:"EUR",  name:"Deposito mensile",      qty:700,   price:1,       fees:0,     total:700.00,   currency:"EUR" },
+  { id:44, date:"2022-03-20", type:"buy",      ticker:"VWCE", name:"Vanguard FTSE — PAC",   qty:6,     price:89.40,   fees:1.50,  total:537.90,   currency:"EUR" },
+  { id:45, date:"2022-04-01", type:"dividend", ticker:"AAPL", name:"Apple Dividendo Q1",    qty:1,     price:9.00,    fees:0,     total:9.00,     currency:"USD" },
+  { id:46, date:"2022-05-15", type:"deposit",  ticker:"EUR",  name:"Deposito mensile",      qty:700,   price:1,       fees:0,     total:700.00,   currency:"EUR" },
+  { id:47, date:"2022-05-20", type:"buy",      ticker:"VWCE", name:"Vanguard FTSE — PAC",   qty:7,     price:83.20,   fees:1.50,  total:583.90,   currency:"EUR" },
+  { id:48, date:"2022-06-10", type:"buy",      ticker:"BTC",  name:"Bitcoin — DCA bear",    qty:0.05,  price:22000,   fees:7.00,  total:1107.00,  currency:"USD" },
+  { id:49, date:"2022-06-15", type:"buy",      ticker:"AAPL", name:"Apple Inc. — dip buy",  qty:5,     price:130.00,  fees:1.50,  total:651.50,   currency:"USD" },
+  { id:50, date:"2022-07-15", type:"deposit",  ticker:"EUR",  name:"Deposito mensile",      qty:700,   price:1,       fees:0,     total:700.00,   currency:"EUR" },
+  { id:51, date:"2022-07-20", type:"buy",      ticker:"VWCE", name:"Vanguard FTSE — PAC",   qty:7,     price:81.00,   fees:1.50,  total:568.50,   currency:"EUR" },
+  { id:52, date:"2022-08-10", type:"buy",      ticker:"CSPX", name:"iShares S&P 500 — dip", qty:3,     price:368.00,  fees:2.00,  total:1106.00,  currency:"USD" },
+  { id:53, date:"2022-09-15", type:"deposit",  ticker:"EUR",  name:"Deposito mensile",      qty:700,   price:1,       fees:0,     total:700.00,   currency:"EUR" },
+  { id:54, date:"2022-09-20", type:"buy",      ticker:"VWCE", name:"Vanguard FTSE — PAC",   qty:7,     price:78.40,   fees:1.50,  total:550.30,   currency:"EUR" },
+  { id:55, date:"2022-10-01", type:"dividend", ticker:"MSFT", name:"Microsoft Dividendo",   qty:1,     price:18.50,   fees:0,     total:18.50,    currency:"USD" },
+  { id:56, date:"2022-10-15", type:"buy",      ticker:"ETH",  name:"Ethereum — merge dip",  qty:0.3,   price:1280,    fees:4.00,  total:388.00,   currency:"USD" },
+  { id:57, date:"2022-11-15", type:"deposit",  ticker:"EUR",  name:"Deposito mensile",      qty:700,   price:1,       fees:0,     total:700.00,   currency:"EUR" },
+  { id:58, date:"2022-11-20", type:"buy",      ticker:"VWCE", name:"Vanguard FTSE — PAC",   qty:7,     price:80.60,   fees:1.50,  total:566.70,   currency:"EUR" },
+  { id:59, date:"2022-12-15", type:"buy",      ticker:"BTC",  name:"Bitcoin — DCA FTX dip", qty:0.05,  price:16500,   fees:6.00,  total:831.00,   currency:"USD" },
+  { id:60, date:"2022-12-20", type:"fee",      ticker:"EUR",  name:"Commissioni piattaforma",qty:1,    price:12.00,   fees:0,     total:12.00,    currency:"EUR" },
+
+  // ── 2023 — La ripresa ──────────────────────────────────────────────────────
+  { id:61, date:"2023-01-15", type:"deposit",  ticker:"EUR",  name:"Deposito mensile",      qty:800,   price:1,       fees:0,     total:800.00,   currency:"EUR" },
+  { id:62, date:"2023-01-20", type:"buy",      ticker:"VWCE", name:"Vanguard FTSE — PAC",   qty:8,     price:83.40,   fees:1.50,  total:668.70,   currency:"EUR" },
+  { id:63, date:"2023-02-10", type:"buy",      ticker:"MSFT", name:"Microsoft Corp.",       qty:2,     price:252.00,  fees:1.50,  total:505.50,   currency:"USD" },
+  { id:64, date:"2023-03-15", type:"deposit",  ticker:"EUR",  name:"Deposito mensile",      qty:800,   price:1,       fees:0,     total:800.00,   currency:"EUR" },
+  { id:65, date:"2023-03-20", type:"buy",      ticker:"VWCE", name:"Vanguard FTSE — PAC",   qty:8,     price:86.20,   fees:1.50,  total:691.10,   currency:"EUR" },
+  { id:66, date:"2023-04-01", type:"dividend", ticker:"AAPL", name:"Apple Dividendo Q1",    qty:1,     price:9.20,    fees:0,     total:9.20,     currency:"USD" },
+  { id:67, date:"2023-04-15", type:"buy",      ticker:"BTC",  name:"Bitcoin — ripresa",     qty:0.03,  price:28000,   fees:6.00,  total:846.00,   currency:"USD" },
+  { id:68, date:"2023-05-15", type:"deposit",  ticker:"EUR",  name:"Deposito mensile",      qty:800,   price:1,       fees:0,     total:800.00,   currency:"EUR" },
+  { id:69, date:"2023-05-20", type:"buy",      ticker:"VWCE", name:"Vanguard FTSE — PAC",   qty:8,     price:90.10,   fees:1.50,  total:722.30,   currency:"EUR" },
+  { id:70, date:"2023-06-10", type:"buy",      ticker:"CSPX", name:"iShares S&P 500",       qty:3,     price:420.00,  fees:2.00,  total:1262.00,  currency:"USD" },
+  { id:71, date:"2023-07-15", type:"deposit",  ticker:"EUR",  name:"Deposito mensile",      qty:800,   price:1,       fees:0,     total:800.00,   currency:"EUR" },
+  { id:72, date:"2023-07-20", type:"buy",      ticker:"VWCE", name:"Vanguard FTSE — PAC",   qty:8,     price:93.60,   fees:1.50,  total:750.30,   currency:"EUR" },
+  { id:73, date:"2023-08-10", type:"sell",     ticker:"AAPL", name:"Apple — presa profitto",qty:2,     price:178.00,  fees:1.50,  total:354.50,   currency:"USD" },
+  { id:74, date:"2023-09-15", type:"deposit",  ticker:"EUR",  name:"Deposito mensile",      qty:800,   price:1,       fees:0,     total:800.00,   currency:"EUR" },
+  { id:75, date:"2023-09-20", type:"buy",      ticker:"VWCE", name:"Vanguard FTSE — PAC",   qty:8,     price:91.80,   fees:1.50,  total:736.10,   currency:"EUR" },
+  { id:76, date:"2023-10-01", type:"dividend", ticker:"MSFT", name:"Microsoft Dividendo",   qty:1,     price:19.20,   fees:0,     total:19.20,    currency:"USD" },
+  { id:77, date:"2023-10-15", type:"buy",      ticker:"ETH",  name:"Ethereum — accumulo",   qty:0.2,   price:1580,    fees:4.00,  total:320.00,   currency:"USD" },
+  { id:78, date:"2023-11-15", type:"deposit",  ticker:"EUR",  name:"Deposito mensile",      qty:800,   price:1,       fees:0,     total:800.00,   currency:"EUR" },
+  { id:79, date:"2023-11-20", type:"buy",      ticker:"VWCE", name:"Vanguard FTSE — PAC",   qty:8,     price:96.40,   fees:1.50,  total:772.70,   currency:"EUR" },
+  { id:80, date:"2023-12-10", type:"buy",      ticker:"XAUM", name:"Gold ETC — ribilancio", qty:5,     price:172.00,  fees:1.50,  total:861.50,   currency:"EUR" },
+  { id:81, date:"2023-12-20", type:"buy",      ticker:"BTC",  name:"Bitcoin — ETF hype",    qty:0.02,  price:42000,   fees:6.00,  total:846.00,   currency:"USD" },
+
+  // ── 2024 — Bull run ────────────────────────────────────────────────────────
+  { id:82, date:"2024-01-10", type:"deposit",  ticker:"EUR",  name:"Deposito mensile",      qty:1000,  price:1,       fees:0,     total:1000.00,  currency:"EUR" },
+  { id:83, date:"2024-01-15", type:"buy",      ticker:"VWCE", name:"Vanguard FTSE — PAC",   qty:8,     price:99.20,   fees:1.50,  total:795.10,   currency:"EUR" },
+  { id:84, date:"2024-02-01", type:"buy",      ticker:"AAPL", name:"Apple Inc.",            qty:3,     price:182.00,  fees:1.50,  total:547.50,   currency:"USD" },
+  { id:85, date:"2024-02-14", type:"buy",      ticker:"BTC",  name:"Bitcoin — pre halving", qty:0.03,  price:48000,   fees:10.00, total:1450.00,  currency:"USD" },
+  { id:86, date:"2024-03-05", type:"buy",      ticker:"MSFT", name:"Microsoft Corp.",       qty:2,     price:395.00,  fees:1.50,  total:791.50,   currency:"USD" },
+  { id:87, date:"2024-04-01", type:"dividend", ticker:"AAPL", name:"Apple Dividendo Q1",    qty:1,     price:9.80,    fees:0,     total:9.80,     currency:"USD" },
+  { id:88, date:"2024-04-20", type:"buy",      ticker:"ETH",  name:"Ethereum",              qty:0.3,   price:2800,    fees:6.00,  total:846.00,   currency:"USD" },
+  { id:89, date:"2024-05-10", type:"buy",      ticker:"CSPX", name:"iShares S&P 500",       qty:3,     price:488.00,  fees:2.00,  total:1466.00,  currency:"USD" },
+  { id:90, date:"2024-06-01", type:"sell",     ticker:"BTC",  name:"Bitcoin — presa profit",qty:0.03,  price:67000,   fees:12.00, total:1998.00,  currency:"USD" },
+  { id:91, date:"2024-07-15", type:"buy",      ticker:"XAUM", name:"Gold ETC",              qty:5,     price:188.00,  fees:1.50,  total:941.50,   currency:"EUR" },
+  { id:92, date:"2024-08-10", type:"deposit",  ticker:"EUR",  name:"Deposito extra",        qty:2000,  price:1,       fees:0,     total:2000.00,  currency:"EUR" },
+  { id:93, date:"2024-09-15", type:"buy",      ticker:"VWCE", name:"Vanguard FTSE — PAC",   qty:10,    price:108.40,  fees:1.50,  total:1085.50,  currency:"EUR" },
+  { id:94, date:"2024-10-01", type:"dividend", ticker:"MSFT", name:"Microsoft Dividendo",   qty:1,     price:21.00,   fees:0,     total:21.00,    currency:"USD" },
+  { id:95, date:"2024-10-20", type:"buy",      ticker:"AAPL", name:"Apple Inc.",            qty:2,     price:225.00,  fees:1.50,  total:451.50,   currency:"USD" },
+  { id:96, date:"2024-11-10", type:"buy",      ticker:"BTC",  name:"Bitcoin — post elezioni",qty:0.02, price:78000,   fees:10.00, total:1570.00,  currency:"USD" },
+  { id:97, date:"2024-12-15", type:"buy",      ticker:"VWCE", name:"Vanguard FTSE — PAC",   qty:8,     price:113.20,  fees:1.50,  total:907.10,   currency:"EUR" },
+  { id:98, date:"2024-12-20", type:"dividend", ticker:"AAPL", name:"Apple Dividendo Q4",    qty:1,     price:10.20,   fees:0,     total:10.20,    currency:"USD" },
 ];
 
 const MONTHLY_CONTRIBUTIONS = [
-  { m:"Gen", val:5000 },{ m:"Feb", val:2860 },{ m:"Mar", val:2360 },
-  { m:"Apr", val:0 },   { m:"Mag", val:5310 },{ m:"Giu", val:0 },
-  { m:"Lug", val:3500 },{ m:"Ago", val:0 },   { m:"Set", val:0 },
-  { m:"Ott", val:0 },   { m:"Nov", val:0 },   { m:"Dic", val:0 },
+  { m:"Gen", val:1000 },{ m:"Feb", val:1000 },{ m:"Mar", val:1000 },
+  { m:"Apr", val:1000 },{ m:"Mag", val:1000 },{ m:"Giu", val:1000 },
+  { m:"Lug", val:1000 },{ m:"Ago", val:3000 },{ m:"Set", val:1000 },
+  { m:"Ott", val:1000 },{ m:"Nov", val:1000 },{ m:"Dic", val:1000 },
 ];
 
 const DIVIDENDS = [
-  { m:"Gen",val:0 },{ m:"Feb",val:0 },{ m:"Mar",val:0 },
-  { m:"Apr",val:24 },{ m:"Mag",val:0 },{ m:"Giu",val:18 },
-  { m:"Lug",val:0 },{ m:"Ago",val:24 },{ m:"Set",val:0 },
-  { m:"Ott",val:22 },{ m:"Nov",val:0 },{ m:"Dic",val:26 },
+  { m:"Gen",val:0  },{ m:"Feb",val:0  },{ m:"Mar",val:0   },
+  { m:"Apr",val:34 },{ m:"Mag",val:0  },{ m:"Giu",val:21  },
+  { m:"Lug",val:0  },{ m:"Ago",val:0  },{ m:"Set",val:0   },
+  { m:"Ott",val:39 },{ m:"Nov",val:0  },{ m:"Dic",val:31  },
 ];
 
 // ─── CALCULATIONS ─────────────────────────────────────────────────────────────
@@ -245,7 +421,7 @@ function TimeframeSelector({ value, onChange }) {
   return (
     <div style={{ display:"flex", gap:4, background:T.surface,
       borderRadius:10, padding:4, border:`1px solid ${T.border}` }}>
-      {["1M","3M","6M","YTD","1Y","MAX"].map(tf => (
+      {["1G","3G","1S","1M","3M","6M","YTD","1A","2A","5A"].map(tf => (
         <button key={tf} onClick={() => onChange(tf)} style={{
           background: value===tf ? T.card : "transparent",
           color: value===tf ? T.accent : T.muted2,
@@ -272,432 +448,594 @@ const NAV = [
 // ══════════════════════════════════════════════════════════════════════════════
 
 // ─── DASHBOARD PAGE ───────────────────────────────────────────────────────────
-function DashboardPage({ holdings }) {
-  const [tf, setTf] = useState("1Y");
-  const [activeBenchmarks, setActiveBenchmarks] = useState(DEFAULT_BENCHMARKS);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+function DashboardPage({ holdings, cryptoData, cryptoLoading, lastUpdated, refetch }) {
+  const [tf, setTf] = useState("1A");
+  const [assetFilter, setAssetFilter] = useState("Tutti");
+  const [marketOpen] = useState(true);
+  const [countdown] = useState("02:41:15");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredSnapshots = useMemo(() => {
-    if (tf === "1M") return SNAPSHOTS.slice(-1);
-    if (tf === "3M") return SNAPSHOTS.slice(-3);
-    if (tf === "6M") return SNAPSHOTS.slice(-6);
-    return SNAPSHOTS;
+  const totalCurrent  = holdings.reduce((s,h) => s+h.current, 0);
+  const totalInvested = holdings.reduce((s,h) => s+h.invested, 0);
+  const totalPL       = totalCurrent - totalInvested;
+  const totalPLpct    = totalInvested ? (totalPL/totalInvested)*100 : 0;
+  const dailyPL       = totalCurrent * 0.0058;
+  const dailyPLpct    = 0.58;
+
+
+  // Sparkline data for KPI cards
+  const sparkDaily  = [12,18,14,22,19,28,24,31,27,35,30,38,35,42];
+  const sparkTotal  = [100,108,104,115,110,122,118,128,124,135,130,140,136,144];
+  const sparkRisk   = [65,68,64,70,67,72,69,74,71,76,73,78,75,80];
+
+  // Portfolio value chart data by timeframe
+  const chartData = useMemo(() => {
+    if (tf==="1G") return [
+      {date:"09:00",value:56820},{date:"10:00",value:57050},{date:"11:00",value:56940},
+      {date:"12:00",value:57180},{date:"13:00",value:57090},{date:"14:00",value:57260},
+      {date:"15:00",value:57380},{date:"16:00",value:57200},
+    ];
+    if (tf==="3G") return [
+      {date:"Ven 08:00",value:55800},{date:"Ven 16:00",value:56200},
+      {date:"Sab",value:56400},{date:"Dom",value:56600},
+      {date:"Lun 08:00",value:56800},{date:"Lun 16:00",value:57200},
+    ];
+    if (tf==="1S") return [
+      {date:"Lun",value:55200},{date:"Mar",value:55800},{date:"Mer",value:55400},
+      {date:"Gio",value:56200},{date:"Ven",value:56800},{date:"Sab",value:57000},{date:"Dom",value:57200},
+    ];
+    if (tf==="1M") return [
+      {date:"1 Nov",value:54800},{date:"8 Nov",value:55600},{date:"15 Nov",value:55200},
+      {date:"22 Nov",value:56400},{date:"29 Nov",value:57200},
+    ];
+    if (tf==="3M") return SNAPSHOTS_5Y.slice(-3);
+    if (tf==="6M") return SNAPSHOTS_5Y.slice(-6);
+    if (tf==="YTD") return SNAPSHOTS_5Y.slice(-12);
+    if (tf==="1A") return SNAPSHOTS_5Y.slice(-12);
+    if (tf==="2A") return SNAPSHOTS_5Y.slice(-24);
+    if (tf==="5A") return SNAPSHOTS_5Y;
+    return SNAPSHOTS_5Y;
   }, [tf]);
 
-  const benchSeries = useMemo(() => buildBenchmarkSeries(filteredSnapshots), [filteredSnapshots]);
+  // P&L calcolato sul periodo selezionato
+  const periodStats = useMemo(() => {
+    const data = chartData;
+    if (!data || data.length < 2) return { pl: totalPL, plPct: totalPLpct, startValue: totalCurrent };
+    const startValue = data[0].value;
+    const endValue   = data[data.length - 1].value;
+    const pl    = endValue - startValue;
+    const plPct = (pl / startValue) * 100;
+    return { pl, plPct, startValue, endValue };
+  }, [chartData, totalCurrent, totalPL, totalPLpct]);
 
-  const totalCurrent  = holdings.reduce((s,h) => s + h.current, 0);
-  const totalInvested = holdings.reduce((s,h) => s + h.invested, 0);
-  const totalPL       = totalCurrent - totalInvested;
-  const totalPLpct    = totalInvested ? (totalPL / totalInvested) * 100 : 0;
-  const realizedPL    = 368.50 - (2 * 148.50); // from demo sell
-  const cashBalance   = 2800;
-  const dailyChange   = totalCurrent * 0.0034;
-
-  // allocation by type
+  // Allocation donut
   const byType = useMemo(() => {
     const m = {};
-    holdings.forEach(h => {
-      if (!m[h.type]) m[h.type] = 0;
-      m[h.type] += h.current;
-    });
-    return Object.entries(m).map(([name, value]) => ({
-      name, value, pct: (value / totalCurrent) * 100
-    }));
+    holdings.forEach(h => { if(!m[h.type]) m[h.type]=0; m[h.type]+=h.current; });
+    return Object.entries(m).map(([name,value])=>({ name, value, pct:(value/totalCurrent*100) }));
   }, [holdings, totalCurrent]);
 
-  // sector allocation
+  // Sector donut
   const bySector = useMemo(() => {
     const m = {};
-    holdings.forEach(h => {
-      if (!m[h.sector]) m[h.sector] = 0;
-      m[h.sector] += h.current;
-    });
-    return Object.entries(m).map(([name, value], i) => ({
-      name, value, pct: (value / totalCurrent) * 100, color: SECTOR_COLORS[i]
-    }));
+    holdings.forEach(h => { if(!m[h.sector]) m[h.sector]=0; m[h.sector]+=h.current; });
+    return Object.entries(m).map(([name,value],i)=>({ name, value, pct:(value/totalCurrent*100), color:SECTOR_COLORS[i] }));
   }, [holdings, totalCurrent]);
+
+  // Risk score calculation
+  const riskScore = useMemo(() => {
+    const cryptoPct = byType.find(t=>t.name==="Crypto")?.pct || 0;
+    const stockPct  = byType.find(t=>t.name==="Stock")?.pct  || 0;
+    return Math.min(100, Math.round(cryptoPct*1.2 + stockPct*0.6 + 20));
+  }, [byType]);
+
+  const riskLabel = riskScore < 30 ? "Conservativo" : riskScore < 55 ? "Moderato" : riskScore < 75 ? "Aggressivo" : "Molto Aggressivo";
+  const riskColor = riskScore < 30 ? T.green : riskScore < 55 ? T.yellow : riskScore < 75 ? T.orange : T.red;
+
+  // Market sentiment (simulated)
+  const sentimentScore = 65;
+  const sentimentLabel = "Positivo";
+
+  // Filtered assets
+  const filteredAssets = useMemo(() => {
+    let list = holdings;
+    if (assetFilter !== "Tutti") list = list.filter(h => h.type === assetFilter);
+    if (searchQuery) list = list.filter(h =>
+      h.ticker.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      h.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    return list;
+  }, [holdings, assetFilter, searchQuery]);
+
+  // Indices live data
+  const INDICES = [
+    { name:"S&P 500",   value:"5.278,40", change:+1.32, color:T.green },
+    { name:"NASDAQ 100",value:"18.529,95",change:+1.85, color:T.green },
+    { name:"DOW JONES", value:"39.872,99",change:+0.92, color:T.green },
+    { name:"DAX 40",    value:"18.675,24",change:+1.12, color:T.green },
+    { name:"NIKKEI 225",value:"38.920,26",change:-0.45, color:T.red  },
+    { name:"EUR/USD",   value:"1,0842",   change:-0.12, color:T.red  },
+    { name:"Gold",      value:"2.341,50", change:+0.34, color:T.green },
+    { name:"BTC/EUR",   value: cryptoData.btcPrice ? cryptoData.btcPrice.toLocaleString("it-IT") : "62.400",
+      change: cryptoData.btcChange ?? +2.14, color: (cryptoData.btcChange??1)>=0 ? T.green : T.red },
+  ];
+
+  // Economic calendar
+  const CALENDAR = [
+    { time:"15:30", day:"Oggi",   flag:"🇺🇸", event:"CPI (Inflazione)",        impact:"Alto" },
+    { time:"16:00", day:"Oggi",   flag:"🇺🇸", event:"Fed Interest Rate Decision",impact:"Alto" },
+    { time:"09:30", day:"Domani", flag:"🇺🇸", event:"Non-Farm Payrolls",       impact:"Alto" },
+    { time:"11:00", day:"Domani", flag:"🇪🇺", event:"PIL Eurozona (Q1)",        impact:"Medio" },
+    { time:"14:30", day:"Ven",    flag:"🇬🇧", event:"Retail Sales UK",          impact:"Medio" },
+  ];
+
+  // AI Insights
+  const AI_INSIGHTS = [
+    { ticker:"AAPL", name:"Apple Inc.",      tag:"OPPORTUNITA",   tagColor:T.green,  desc:"Potenziale rialzo del 15,2% secondo l'analisi tecnica" },
+    { ticker:"VWCE", name:"ETF Technology",  tag:"DIVERSIFICA",   tagColor:T.accent, desc:"Riduci rischio da concentrazione settoriale" },
+    { ticker:"TSLA", name:"Tesla Inc.",      tag:"ATTENZIONE",    tagColor:T.red,    desc:"Alta volatilita prevista nei prossimi 30 giorni" },
+  ];
+
+  // Mini sparkline component
+  function Sparkline({ data, color, height=36 }) {
+    const min = Math.min(...data);
+    const max = Math.max(...data);
+    const w = 80, h = height;
+    const pts = data.map((v,i) => {
+      const x = (i/(data.length-1))*w;
+      const y = h - ((v-min)/(max-min||1))*(h-4) - 2;
+      return `${x},${y}`;
+    }).join(" ");
+    return (
+      <svg width={w} height={h} style={{ overflow:"visible" }}>
+        <defs>
+          <linearGradient id={`sg-${color.replace("#","")}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity={0.3}/>
+            <stop offset="100%" stopColor={color} stopOpacity={0}/>
+          </linearGradient>
+        </defs>
+        <polygon points={`0,${h} ${pts} ${w},${h}`}
+          fill={`url(#sg-${color.replace("#","")})`}/>
+        <polyline points={pts} fill="none" stroke={color} strokeWidth={1.5}/>
+      </svg>
+    );
+  }
+
+  // Gauge component for Risk Score and Sentiment
+  function Gauge({ value, max=100, color, size=110 }) {
+    const pct = value/max;
+    const angle = -140 + pct*280;
+    const r = size/2 - 8;
+    const cx = size/2, cy = size/2;
+    const startAngle = -140*(Math.PI/180);
+    const endAngle   = (angle)*(Math.PI/180);
+    const x1 = cx + r*Math.cos(startAngle);
+    const y1 = cy + r*Math.sin(startAngle);
+    const x2 = cx + r*Math.cos(endAngle);
+    const y2 = cy + r*Math.sin(endAngle);
+    const largeArc = (pct > 0.5 ? 1 : 0);
+    // background arc
+    const bx2 = cx + r*Math.cos(40*(Math.PI/180));
+    const by2 = cy + r*Math.sin(40*(Math.PI/180));
+    return (
+      <svg width={size} height={size*0.7} viewBox={`0 0 ${size} ${size}`} style={{overflow:"visible"}}>
+        <path d={`M ${x1} ${y1} A ${r} ${r} 0 1 1 ${bx2} ${by2}`}
+          fill="none" stroke={T.border2} strokeWidth={8} strokeLinecap="round"/>
+        <path d={`M ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2}`}
+          fill="none" stroke={color} strokeWidth={8} strokeLinecap="round"/>
+      </svg>
+    );
+  }
 
   return (
     <div>
-      {/* hero bar */}
-      <div style={{
-        background:`linear-gradient(135deg, #0d1829 0%, #0a1020 100%)`,
-        borderRadius:20, padding:"28px 32px", marginBottom:20,
-        border:`1px solid ${T.border2}`, position:"relative", overflow:"hidden"
-      }}>
-        <div style={{
-          position:"absolute", top:-60, right:-60, width:240, height:240,
-          borderRadius:"50%", background:`radial-gradient(circle, ${T.accent}12, transparent 70%)`
-        }}/>
-        <div style={{
-          position:"absolute", bottom:-40, left:"40%", width:160, height:160,
-          borderRadius:"50%", background:`radial-gradient(circle, ${T.accent2}10, transparent 70%)`
-        }}/>
-        <div style={{ color:T.muted2, fontSize:12, fontWeight:700,
-          textTransform:"uppercase", letterSpacing:"0.1em", marginBottom:8 }}>
-          Portafoglio Totale
-        </div>
-        <div style={{ fontSize:48, fontWeight:900, letterSpacing:"-0.04em", lineHeight:1,
-          background:`linear-gradient(135deg, ${T.text}, ${T.accent})`,
-          WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>
-          {fmtEur(totalCurrent)}
-        </div>
-        <div style={{ display:"flex", gap:24, marginTop:14, flexWrap:"wrap" }}>
-          <span style={{ color:T.muted2, fontSize:13 }}>
-            Investito: <strong style={{ color:T.text }}>{fmtEur(totalInvested)}</strong>
-          </span>
-          <span style={{ color:clr(totalPL), fontSize:15, fontWeight:800 }}>
-            {sign(totalPL)} {fmtEur(Math.abs(totalPL))} ({fmtPct(totalPLpct)})
-          </span>
-          <span style={{ color:T.muted2, fontSize:12, marginLeft:"auto", alignSelf:"flex-end" }}>
-            Aggiornato: oggi 18:42
-          </span>
-        </div>
-      </div>
-
-      {/* KPI grid */}
-      <div style={{ display:"flex", gap:12, marginBottom:20, flexWrap:"wrap" }}>
-        <KpiCard label="P&L Non Realizzato" value={fmtEur(totalPL)}
-          sub={fmtPct(totalPLpct)} subColor={clr(totalPL)} icon="📈"/>
-        <KpiCard label="P&L Realizzato" value={fmtEur(Math.abs(realizedPL))}
-          sub="dalla vendita AAPL" subColor={clr(realizedPL)} icon="✓"/>
-        <KpiCard label="Cash Balance" value={fmtEur(cashBalance)}
-          sub="EUR disponibili" icon="💶"/>
-        <KpiCard label="Variazione Giornaliera" value={fmtEur(dailyChange)}
-          sub="+0.34% oggi" subColor={T.green} icon="∿"/>
-        <KpiCard label="Rendimento Totale" value={fmtPct(totalPLpct)}
-          sub={`su ${fmtEur(totalInvested)} investiti`} subColor={clr(totalPL)} icon="⊕"/>
-      </div>
-
-      {/* BENCHMARK COMPARISON CHART */}
-      <div style={{ background:T.card, borderRadius:20, padding:"28px",
-        border:`1px solid ${T.border}`, marginBottom:16 }}>
-        
-        {/* header row */}
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:20, flexWrap:"wrap", gap:12 }}>
-          <div>
-            <div style={{ fontWeight:800, fontSize:18, letterSpacing:"-0.02em", marginBottom:4 }}>
-              Benchmark Comparison
-            </div>
-            <div style={{ color:T.muted2, fontSize:12 }}>Portafoglio vs indici di mercato — rendimento %</div>
+      {/* ── WELCOME HEADER ─────────────────────────────────────────────── */}
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
+        <div>
+          <h1 style={{ fontWeight:900, fontSize:24, letterSpacing:"-0.03em", margin:0 }}>
+            Benvenuto, Davide 👋
+          </h1>
+          <div style={{ color:T.muted2, fontSize:13, marginTop:4 }}>
+            Ecco il riepilogo del tuo portafoglio oggi.
           </div>
-          <div style={{ display:"flex", gap:10, alignItems:"center", flexWrap:"wrap" }}>
-            {/* active benchmark pills + dropdown */}
-            <div style={{ display:"flex", gap:6, flexWrap:"wrap", alignItems:"center" }}>
-              {activeBenchmarks.map(key => {
-                const b = BENCHMARKS[key];
-                if (!b) return null;
-                return (
-                  <div key={key} style={{
-                    background:`${b.color}22`, color:b.color,
-                    border:`1px solid ${b.color}55`,
-                    borderRadius:8, padding:"5px 10px", fontSize:11, fontWeight:700,
-                    display:"flex", alignItems:"center", gap:6
-                  }}>
-                    <span style={{ width:8,height:8,borderRadius:"50%",background:b.color,display:"inline-block" }}/>
-                    {b.label}
-                    <button onClick={()=>setActiveBenchmarks(p=>p.filter(k=>k!==key))}
-                      style={{ background:"none", border:"none", color:b.color,
-                        cursor:"pointer", fontSize:13, lineHeight:1, padding:"0 0 0 2px", fontWeight:900 }}>×</button>
-                  </div>
-                );
-              })}
-
-              {/* add benchmark dropdown */}
-              <div style={{ position:"relative" }}>
-                <button onClick={()=>setDropdownOpen(o=>!o)} style={{
-                  background: dropdownOpen ? `${T.accent}22` : T.surface,
-                  color: dropdownOpen ? T.accent : T.muted2,
-                  border:`1px solid ${dropdownOpen ? T.accent+"44" : T.border}`,
-                  borderRadius:8, padding:"5px 12px", cursor:"pointer",
-                  fontSize:11, fontWeight:700, display:"flex", alignItems:"center", gap:6
-                }}>
-                  ＋ Aggiungi indice
-                  <span style={{ fontSize:9, opacity:0.7 }}>{dropdownOpen?"▲":"▼"}</span>
-                </button>
-
-                {dropdownOpen && (
-                  <div style={{
-                    position:"absolute", top:"calc(100% + 6px)", right:0, zIndex:200,
-                    background:T.card, border:`1px solid ${T.border2}`,
-                    borderRadius:14, padding:"8px", minWidth:220,
-                    boxShadow:"0 16px 48px #000d",
-                    display:"flex", flexDirection:"column", gap:2
-                  }}>
-                    <div style={{ color:T.muted, fontSize:10, fontWeight:700,
-                      textTransform:"uppercase", letterSpacing:"0.1em",
-                      padding:"4px 8px 8px" }}>Seleziona indice</div>
-                    {Object.entries(BENCHMARKS).map(([key, b]) => {
-                      const active = activeBenchmarks.includes(key);
-                      return (
-                        <button key={key}
-                          onClick={()=>{
-                            setActiveBenchmarks(p => active ? p.filter(k=>k!==key) : [...p, key]);
-                          }}
-                          style={{
-                            background: active ? `${b.color}18` : "transparent",
-                            color: active ? b.color : T.text,
-                            border:`1px solid ${active ? b.color+"33" : "transparent"}`,
-                            borderRadius:8, padding:"9px 12px", cursor:"pointer",
-                            fontSize:12, fontWeight: active ? 700 : 500,
-                            textAlign:"left", display:"flex", alignItems:"center",
-                            justifyContent:"space-between", gap:10, transition:"all .1s"
-                          }}>
-                          <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                            <span style={{ width:10,height:10,borderRadius:3,
-                              background:b.color,display:"inline-block",flexShrink:0 }}/>
-                            {b.label}
-                            <InfoTooltip isin={b.isin} desc={b.desc}/>
-                          </div>
-                          {active && <span style={{ fontSize:14, fontWeight:900 }}>✓</span>}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
+        </div>
+        <div style={{ display:"flex", alignItems:"center", gap:16 }}>
+          {/* search */}
+          <div style={{ position:"relative" }}>
+            <span style={{ position:"absolute", left:12, top:"50%", transform:"translateY(-50%)",
+              color:T.muted, fontSize:14 }}>🔍</span>
+            <input value={searchQuery} onChange={e=>setSearchQuery(e.target.value)}
+              placeholder="Cerca asset, stock, ETF..."
+              style={{ background:T.card, border:`1px solid ${T.border}`, borderRadius:12,
+                padding:"9px 14px 9px 36px", color:T.text, fontSize:13, width:240,
+                outline:"none" }}/>
+          </div>
+          {/* market status */}
+          <div style={{
+            background: marketOpen ? `${T.green}15` : `${T.red}15`,
+            border:`1px solid ${marketOpen?T.green:T.red}33`,
+            borderRadius:12, padding:"8px 16px",
+            display:"flex", alignItems:"center", gap:8
+          }}>
+            <div style={{ width:8,height:8,borderRadius:"50%",
+              background:marketOpen?T.green:T.red,
+              boxShadow:`0 0 8px ${marketOpen?T.green:T.red}` }}/>
+            <div>
+              <div style={{ color:marketOpen?T.green:T.red, fontWeight:700, fontSize:12 }}>
+                {marketOpen ? "Mercato Aperto" : "Mercato Chiuso"}
+              </div>
+              <div style={{ color:T.muted2, fontSize:10 }}>
+                {marketOpen ? `Chiude in ${countdown}` : "Apre domani 09:30"}
               </div>
             </div>
-            <TimeframeSelector value={tf} onChange={setTf}/>
           </div>
-        </div>
-
-        {/* stat pills */}
-        <div style={{ display:"flex", gap:10, marginBottom:20, flexWrap:"wrap" }}>
-          {[
-            { label:"Il tuo portafoglio", color:T.accent,
-              val: benchSeries.length ? `+${benchSeries[benchSeries.length-1].portafoglio.toFixed(1)}%` : "—" },
-            ...Object.entries(BENCHMARKS)
-              .filter(([k])=>activeBenchmarks.includes(k))
-              .map(([k,b]) => ({
-                label: b.label, color: b.color,
-                val: benchSeries.length ? `+${benchSeries[benchSeries.length-1][k]?.toFixed(1)||0}%` : "—"
-              }))
-          ].map(item => (
-            <div key={item.label} style={{
-              background: `${item.color}12`,
-              border: `1px solid ${item.color}33`,
-              borderRadius:10, padding:"8px 14px",
-              display:"flex", alignItems:"center", gap:8
-            }}>
-              <div style={{ width:10, height:10, borderRadius:3, background:item.color }}/>
-              <span style={{ color:T.muted2, fontSize:11 }}>{item.label}</span>
-              <span style={{ color:item.color, fontWeight:800, fontSize:14 }}>{item.val}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* main line chart */}
-        <ResponsiveContainer width="100%" height={280}>
-          <LineChart data={benchSeries} margin={{ top:5, right:10, left:0, bottom:0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke={T.border} vertical={false}/>
-            <XAxis dataKey="date" tick={{ fill:T.muted, fontSize:11 }} axisLine={false} tickLine={false}/>
-            <YAxis tick={{ fill:T.muted, fontSize:11 }} axisLine={false} tickLine={false}
-              tickFormatter={v => v+"%"} width={46}/>
-            <ReferenceLine y={0} stroke={T.muted2} strokeDasharray="4 4" strokeWidth={1}/>
-            <Tooltip
-              contentStyle={{ background:T.card, border:`1px solid ${T.border2}`, borderRadius:12,
-                boxShadow:"0 8px 32px #000c", padding:"12px 16px" }}
-              labelStyle={{ color:T.muted2, fontSize:11, marginBottom:6 }}
-              formatter={(val, name) => [
-                <span style={{ fontWeight:800 }}>{val > 0 ? "+" : ""}{val}%</span>,
-                name === "portafoglio" ? "Il tuo portafoglio" : BENCHMARKS[name]?.label || name
-              ]}
-            />
-            {/* portafoglio — always shown, thicker */}
-            <Line type="monotone" dataKey="portafoglio" stroke={T.accent}
-              strokeWidth={3} dot={false} name="portafoglio"
-              strokeDasharray={undefined}/>
-            {/* benchmarks */}
-            {activeBenchmarks.map(key => (
-              <Line key={key} type="monotone" dataKey={key}
-                stroke={BENCHMARKS[key].color} strokeWidth={1.5}
-                dot={false} strokeDasharray="5 3" name={key}/>
-            ))}
-          </LineChart>
-        </ResponsiveContainer>
-
-        {/* outperformance summary */}
-        <div style={{ display:"flex", gap:10, marginTop:16, flexWrap:"wrap" }}>
-          {Object.entries(BENCHMARKS)
-            .filter(([k]) => activeBenchmarks.includes(k))
-            .map(([key, b]) => {
-              const last = benchSeries[benchSeries.length-1];
-              if (!last) return null;
-              const diff = (last.portafoglio - (last[key]||0));
-              const beating = diff > 0;
-              return (
-                <div key={key} style={{
-                  background: beating ? `${T.green}10` : `${T.red}10`,
-                  border: `1px solid ${beating ? T.green : T.red}33`,
-                  borderRadius:10, padding:"10px 16px", flex:1, minWidth:140
-                }}>
-                  <div style={{ color:T.muted2, fontSize:10, fontWeight:700,
-                    textTransform:"uppercase", letterSpacing:"0.08em", marginBottom:4 }}>
-                    vs {b.label}
-                  </div>
-                  <div style={{ color: beating ? T.green : T.red, fontWeight:900, fontSize:18 }}>
-                    {beating?"+":""}{diff.toFixed(2)}%
-                  </div>
-                  <div style={{ color:T.muted2, fontSize:11, marginTop:2 }}>
-                    {beating ? "🏆 Stai battendo l'indice" : "📉 Sotto la media"}
-                  </div>
-                </div>
-              );
-            })
-          }
         </div>
       </div>
 
-      {/* value chart + allocation */}
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 320px", gap:16, marginBottom:16 }}>
-        {/* area chart */}
-        <div style={{ background:T.card, borderRadius:20, padding:"24px",
-          border:`1px solid ${T.border}` }}>
-          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:20 }}>
-            <SectionHeader title="Valore Portafoglio" sub="Performance storica"/>
+      {/* ── MAIN GRID ──────────────────────────────────────────────────── */}
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 300px", gap:14, marginBottom:14 }}>
+
+        {/* ── PORTFOLIO VALUE CHART (spans 2 cols) ── */}
+        <div style={{ gridColumn:"1/3", background:T.card, borderRadius:20,
+          padding:"24px", border:`1px solid ${T.border}` }}>
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:16 }}>
+            <div>
+              <div style={{ color:T.muted2, fontSize:11, fontWeight:700,
+                textTransform:"uppercase", letterSpacing:"0.1em", marginBottom:6 }}>
+                Valore Totale Portafoglio
+              </div>
+              <div style={{ fontSize:36, fontWeight:900, letterSpacing:"-0.04em", lineHeight:1 }}>
+                {fmtEur(totalCurrent)}
+              </div>
+              <div style={{ color:clr(totalPLpct), fontSize:14, fontWeight:700, marginTop:6 }}>
+                {totalPL>=0?"+":""}{fmtEur(Math.abs(totalPL))} ({fmtPct(totalPLpct)})
+              </div>
+            </div>
+            {/* timeframe tabs */}
+            <div style={{ display:"flex", gap:2, background:T.surface,
+              borderRadius:10, padding:3, border:`1px solid ${T.border}` }}>
+              {["1G","3G","1S","1M","3M","6M","YTD","1A","2A","5A"].map(t=>(
+                <button key={t} onClick={()=>setTf(t)} style={{
+                  background:tf===t?T.card:"transparent",
+                  color:tf===t?T.accent:T.muted2,
+                  border:tf===t?`1px solid ${T.border2}`:"1px solid transparent",
+                  borderRadius:7, padding:"4px 10px", cursor:"pointer",
+                  fontSize:11, fontWeight:700, transition:"all .15s"
+                }}>{t}</button>
+              ))}
+            </div>
           </div>
-          <ResponsiveContainer width="100%" height={220}>
-            <AreaChart data={filteredSnapshots} margin={{ top:5, right:10, left:0, bottom:0 }}>
+          <ResponsiveContainer width="100%" height={180}>
+            <AreaChart data={chartData} margin={{top:0,right:0,left:0,bottom:0}}>
               <defs>
-                <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={T.accent} stopOpacity={0.25}/>
-                  <stop offset="95%" stopColor={T.accent} stopOpacity={0}/>
+                <linearGradient id="pgrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%"  stopColor={T.green} stopOpacity={0.25}/>
+                  <stop offset="95%" stopColor={T.green} stopOpacity={0}/>
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke={T.border} vertical={false}/>
-              <XAxis dataKey="date" tick={{ fill:T.muted, fontSize:11 }} axisLine={false} tickLine={false}/>
-              <YAxis tick={{ fill:T.muted, fontSize:11 }} axisLine={false} tickLine={false}
-                tickFormatter={v => "€"+Math.round(v/1000)+"k"} width={50}/>
-              <Tooltip content={<ChartTooltip/>}/>
-              <Area type="monotone" dataKey="value" stroke={T.accent} strokeWidth={2.5}
-                fill="url(#g1)" dot={false}/>
+              <XAxis dataKey="date" tick={{fill:T.muted,fontSize:10}} axisLine={false} tickLine={false}/>
+              <YAxis tick={{fill:T.muted,fontSize:10}} axisLine={false} tickLine={false}
+                tickFormatter={v=>"€"+Math.round(v/1000)+"k"} width={46}/>
+              <Tooltip contentStyle={{background:T.card,border:`1px solid ${T.border2}`,borderRadius:10}}
+                labelStyle={{color:T.muted2,fontSize:11}}
+                formatter={v=>[fmtEur(v),"Valore"]}/>
+              <Area type="monotone" dataKey="value" stroke={T.green} strokeWidth={2.5}
+                fill="url(#pgrad)" dot={false}/>
             </AreaChart>
           </ResponsiveContainer>
         </div>
 
-        {/* donut allocation */}
-        <div style={{ background:T.card, borderRadius:20, padding:"24px",
+        {/* ── ALLOCATION DONUT ── */}
+        <div style={{ background:T.card, borderRadius:20, padding:"22px",
           border:`1px solid ${T.border}` }}>
-          <SectionHeader title="Allocazione" sub="Per categoria"/>
-          <ResponsiveContainer width="100%" height={160}>
-            <PieChart>
-              <Pie data={byType} cx="50%" cy="50%" innerRadius={52} outerRadius={72}
-                paddingAngle={3} dataKey="value" stroke="none">
-                {byType.map((e,i) => (
-                  <Cell key={i} fill={ASSET_TYPE_COLORS[e.name] || T.muted}/>
-                ))}
-              </Pie>
-              <Tooltip formatter={v => fmtEur(v)}
-                contentStyle={{ background:T.surface, border:`1px solid ${T.border}`, borderRadius:10 }}/>
-            </PieChart>
-          </ResponsiveContainer>
-          <div style={{ display:"flex", flexDirection:"column", gap:8, marginTop:4 }}>
-            {byType.map(c => (
-              <div key={c.name} style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                  <div style={{ width:9, height:9, borderRadius:3,
-                    background:ASSET_TYPE_COLORS[c.name]||T.muted }}/>
-                  <span style={{ color:T.muted2, fontSize:13 }}>{c.name}</span>
+          <div style={{ fontWeight:700, fontSize:13, color:T.muted2,
+            textTransform:"uppercase", letterSpacing:"0.08em", marginBottom:14 }}>Allocazione</div>
+          <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+            <ResponsiveContainer width={110} height={110}>
+              <PieChart>
+                <Pie data={byType} cx="50%" cy="50%" innerRadius={32} outerRadius={50}
+                  paddingAngle={3} dataKey="value" stroke="none">
+                  {byType.map((e,i)=><Cell key={i} fill={ASSET_TYPE_COLORS[e.name]||T.muted}/>)}
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+            <div style={{flex:1}}>
+              {byType.map(c=>(
+                <div key={c.name} style={{display:"flex",justifyContent:"space-between",
+                  alignItems:"center",marginBottom:8}}>
+                  <div style={{display:"flex",alignItems:"center",gap:6}}>
+                    <div style={{width:8,height:8,borderRadius:2,
+                      background:ASSET_TYPE_COLORS[c.name]||T.muted}}/>
+                    <span style={{color:T.muted2,fontSize:12}}>{c.name}</span>
+                  </div>
+                  <span style={{fontWeight:700,fontSize:12,
+                    color:ASSET_TYPE_COLORS[c.name]||T.text}}>{c.pct.toFixed(1)}%</span>
                 </div>
-                <div style={{ display:"flex", gap:10 }}>
-                  <span style={{ color:T.muted2, fontSize:12 }}>{fmtEur(c.value)}</span>
-                  <span style={{ fontWeight:800, fontSize:13,
-                    color:ASSET_TYPE_COLORS[c.name]||T.text }}>{c.pct.toFixed(1)}%</span>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
+          </div>
+          <div style={{marginTop:12,paddingTop:12,borderTop:`1px solid ${T.border}`,
+            color:T.muted2,fontSize:11,textAlign:"center"}}>
+            Totale: <strong style={{color:T.text}}>{fmtEur(totalCurrent)}</strong>
           </div>
         </div>
       </div>
 
-      {/* second row */}
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:16, marginBottom:16 }}>
-        {/* sector */}
-        <div style={{ background:T.card, borderRadius:20, padding:"24px",
-          border:`1px solid ${T.border}` }}>
-          <SectionHeader title="Settori" sub="Esposizione per settore"/>
-          <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-            {bySector.map((s,i) => (
-              <div key={s.name}>
-                <div style={{ display:"flex", justifyContent:"space-between", marginBottom:4 }}>
-                  <span style={{ fontSize:12, color:T.muted2 }}>{s.name}</span>
-                  <span style={{ fontSize:12, fontWeight:700, color:s.color }}>{s.pct.toFixed(1)}%</span>
-                </div>
-                <div style={{ height:4, background:T.border, borderRadius:2 }}>
-                  <div style={{ height:4, width:`${s.pct}%`, background:s.color, borderRadius:2 }}/>
-                </div>
+      {/* ── KPI CARDS ROW ──────────────────────────────────────────────── */}
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:14, marginBottom:14 }}>
+        {[
+          { label:"Guadagno Giornaliero", value:fmtEur(dailyPL), sub:`+${dailyPLpct}%`, color:T.green, spark:sparkDaily },
+          { label:`Guadagno (${tf})`, value:(periodStats.pl>=0?"+":"")+fmtEur(Math.abs(periodStats.pl)), sub:(periodStats.pl>=0?"+":"")+periodStats.plPct.toFixed(2)+"%", color:clr(periodStats.pl), spark:sparkTotal },
+          { label:"Capitale Investito",   value:fmtEur(totalInvested), sub:"Costo base totale", color:T.muted2, spark:null },
+          { label:"P&L Realizzato",       value:"€ 71,50", sub:"dalla vendita AAPL", color:T.green, spark:null },
+        ].map((k,i)=>(
+          <div key={i} style={{background:T.card,borderRadius:16,padding:"18px 20px",
+            border:`1px solid ${T.border}`,position:"relative",overflow:"hidden"}}>
+            <div style={{color:T.muted2,fontSize:10,fontWeight:700,
+              textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:8}}>{k.label}</div>
+            <div style={{fontSize:20,fontWeight:900,letterSpacing:"-0.02em"}}>{k.value}</div>
+            <div style={{color:k.color,fontSize:12,fontWeight:700,marginTop:4}}>{k.sub}</div>
+            {k.spark && (
+              <div style={{position:"absolute",bottom:12,right:12,opacity:0.7}}>
+                <Sparkline data={k.spark} color={k.color}/>
               </div>
-            ))}
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* ── SECOND ROW: Risk + Sector + AI Insights + Indices ─────────── */}
+      <div style={{ display:"grid", gridTemplateColumns:"200px 1fr 260px 220px", gap:14, marginBottom:14 }}>
+
+        {/* Risk Score */}
+        <div style={{background:T.card,borderRadius:20,padding:"20px",
+          border:`1px solid ${T.border}`,textAlign:"center"}}>
+          <div style={{color:T.muted2,fontSize:10,fontWeight:700,
+            textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:8}}>Risk Score</div>
+          <div style={{display:"flex",justifyContent:"center"}}>
+            <Gauge value={riskScore} color={riskColor} size={130}/>
+          </div>
+          <div style={{fontSize:36,fontWeight:900,color:riskColor,marginTop:-20,lineHeight:1}}>{riskScore}</div>
+          <div style={{color:riskColor,fontSize:12,fontWeight:700,marginTop:4}}>{riskLabel}</div>
+          <div style={{color:T.muted2,fontSize:10,marginTop:6,lineHeight:1.5}}>
+            Il tuo portafoglio ha un livello di rischio {riskLabel.toLowerCase()}.
           </div>
         </div>
 
-        {/* contributions */}
-        <div style={{ background:T.card, borderRadius:20, padding:"24px",
-          border:`1px solid ${T.border}` }}>
-          <SectionHeader title="Contributi Mensili" sub="Versamenti nel 2024"/>
-          <ResponsiveContainer width="100%" height={170}>
-            <BarChart data={MONTHLY_CONTRIBUTIONS} margin={{ top:0, right:0, left:0, bottom:0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={T.border} vertical={false}/>
-              <XAxis dataKey="m" tick={{ fill:T.muted, fontSize:10 }} axisLine={false} tickLine={false}/>
-              <YAxis tick={{ fill:T.muted, fontSize:10 }} axisLine={false} tickLine={false}
-                tickFormatter={v => v ? "€"+v/1000+"k" : ""} width={38}/>
-              <Tooltip content={<ChartTooltip/>}/>
-              <Bar dataKey="val" fill={T.purple} radius={[4,4,0,0]}/>
-            </BarChart>
-          </ResponsiveContainer>
+        {/* Sector Donut */}
+        <div style={{background:T.card,borderRadius:20,padding:"20px",
+          border:`1px solid ${T.border}`}}>
+          <div style={{color:T.muted2,fontSize:10,fontWeight:700,
+            textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:14}}>Esposizione per Settore</div>
+          <div style={{display:"flex",alignItems:"center",gap:16}}>
+            <ResponsiveContainer width={130} height={130}>
+              <PieChart>
+                <Pie data={bySector} cx="50%" cy="50%" innerRadius={38} outerRadius={58}
+                  paddingAngle={2} dataKey="value" stroke="none">
+                  {bySector.map((e,i)=><Cell key={i} fill={e.color}/>)}
+                </Pie>
+                <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle"
+                  fill={T.text} fontSize={10} fontWeight={700}>
+                  {bySector[0]?.name}
+                </text>
+              </PieChart>
+            </ResponsiveContainer>
+            <div style={{flex:1}}>
+              {bySector.map(s=>(
+                <div key={s.name} style={{marginBottom:7}}>
+                  <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
+                    <span style={{fontSize:11,color:T.muted2}}>{s.name}</span>
+                    <span style={{fontSize:11,fontWeight:700,color:s.color}}>{s.pct.toFixed(1)}%</span>
+                  </div>
+                  <div style={{height:3,background:T.border,borderRadius:2}}>
+                    <div style={{height:3,width:`${s.pct}%`,background:s.color,borderRadius:2}}/>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
-        {/* dividends */}
-        <div style={{ background:T.card, borderRadius:20, padding:"24px",
-          border:`1px solid ${T.border}` }}>
-          <SectionHeader title="Dividendi" sub="Incassi per mese"/>
-          <ResponsiveContainer width="100%" height={170}>
-            <BarChart data={DIVIDENDS} margin={{ top:0, right:0, left:0, bottom:0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={T.border} vertical={false}/>
-              <XAxis dataKey="m" tick={{ fill:T.muted, fontSize:10 }} axisLine={false} tickLine={false}/>
-              <YAxis tick={{ fill:T.muted, fontSize:10 }} axisLine={false} tickLine={false}
-                tickFormatter={v => v ? "€"+v : ""} width={30}/>
-              <Tooltip content={<ChartTooltip/>}/>
-              <Bar dataKey="val" fill={T.green} radius={[4,4,0,0]}/>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* top movers */}
-      <div style={{ background:T.card, borderRadius:20, padding:"24px",
-        border:`1px solid ${T.border}` }}>
-        <SectionHeader title="Top Holdings" sub="Per performance"/>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:12 }}>
-          {[...holdings].sort((a,b) => b.plPct - a.plPct).slice(0,4).map(h => (
-            <div key={h.id} style={{
-              background:T.surface, borderRadius:14, padding:"16px",
-              border:`1px solid ${T.border}`, transition:"all .2s"
-            }}>
-              <div style={{ display:"flex", justifyContent:"space-between", marginBottom:8 }}>
-                <div style={{
-                  width:36, height:36, borderRadius:10,
-                  background:`${h.color}22`, display:"flex", alignItems:"center",
-                  justifyContent:"center", color:h.color, fontWeight:900, fontSize:11
-                }}>{h.ticker.slice(0,3)}</div>
-                <Badge label={h.type} color={ASSET_TYPE_COLORS[h.type]||T.muted}/>
+        {/* AI Insights */}
+        <div style={{background:T.card,borderRadius:20,padding:"20px",
+          border:`1px solid ${T.border}`}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+            <div style={{color:T.muted2,fontSize:10,fontWeight:700,
+              textTransform:"uppercase",letterSpacing:"0.08em"}}>AI Insights</div>
+            <div style={{background:`${T.purple}22`,color:T.purple,
+              border:`1px solid ${T.purple}33`,borderRadius:6,
+              padding:"2px 8px",fontSize:9,fontWeight:800}}>BETA</div>
+          </div>
+          <div style={{fontSize:11,color:T.muted2,marginBottom:12}}>
+            Il nostro algoritmo ha identificato{" "}
+            <span style={{color:T.accent,fontWeight:700}}>3 opportunita</span> per il tuo portafoglio.
+          </div>
+          {AI_INSIGHTS.map((ins,i)=>(
+            <div key={i} style={{background:T.surface,borderRadius:10,padding:"10px 12px",
+              marginBottom:8,border:`1px solid ${T.border}`}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
+                <span style={{fontWeight:800,fontSize:12}}>{ins.ticker}</span>
+                <span style={{background:`${ins.tagColor}18`,color:ins.tagColor,
+                  border:`1px solid ${ins.tagColor}33`,borderRadius:5,
+                  padding:"1px 6px",fontSize:8,fontWeight:800}}>{ins.tag}</span>
               </div>
-              <div style={{ fontWeight:800, fontSize:14, marginBottom:2 }}>{h.ticker}</div>
-              <div style={{ color:T.muted2, fontSize:11, marginBottom:10 }}>{h.name}</div>
-              <div style={{ color:clr(h.plPct), fontWeight:800, fontSize:20 }}>
-                {fmtPct(h.plPct)}
+              <div style={{color:T.muted2,fontSize:10,lineHeight:1.4}}>{ins.desc}</div>
+              <div style={{color:T.accent,fontSize:10,fontWeight:700,marginTop:4,cursor:"pointer"}}>
+                Scopri di piu →
               </div>
-              <div style={{ color:T.muted2, fontSize:12 }}>{fmtEur(h.pl)} P&L</div>
             </div>
           ))}
+        </div>
+
+        {/* Indices + Currencies */}
+        <div style={{background:T.card,borderRadius:20,padding:"20px",
+          border:`1px solid ${T.border}`}}>
+          <div style={{display:"flex",gap:0,marginBottom:14,background:T.surface,
+            borderRadius:8,padding:3,border:`1px solid ${T.border}`}}>
+            {["Indici","Valute","Crypto"].map((tab,i)=>(
+              <button key={tab} style={{flex:1,background:i===0?T.card:"transparent",
+                color:i===0?T.accent:T.muted2,border:i===0?`1px solid ${T.border2}`:"1px solid transparent",
+                borderRadius:6,padding:"4px",cursor:"pointer",fontSize:10,fontWeight:700}}>
+                {tab}
+              </button>
+            ))}
+          </div>
+          {INDICES.slice(0,7).map((idx,i)=>(
+            <div key={i} style={{display:"flex",justifyContent:"space-between",
+              alignItems:"center",padding:"6px 0",
+              borderBottom:i<6?`1px solid ${T.border}`:"none"}}>
+              <span style={{fontSize:11,color:T.muted2}}>{idx.name}</span>
+              <div style={{textAlign:"right"}}>
+                <div style={{fontSize:11,fontWeight:700}}>{idx.value}</div>
+                <div style={{fontSize:10,color:idx.color,fontWeight:700}}>
+                  {idx.change>=0?"+":""}{idx.change.toFixed(2)}%
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── ASSETS TABLE + CALENDAR + SENTIMENT ───────────────────────── */}
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 300px", gap:14 }}>
+
+        {/* Assets Table */}
+        <div style={{background:T.card,borderRadius:20,padding:"22px",
+          border:`1px solid ${T.border}`}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+            <div style={{fontWeight:700,fontSize:13,color:T.muted2,
+              textTransform:"uppercase",letterSpacing:"0.08em"}}>I Tuoi Asset</div>
+            {/* filter tabs */}
+            <div style={{display:"flex",gap:4}}>
+              {["Tutti","Stock","ETF","Crypto","Cash"].map(f=>(
+                <button key={f} onClick={()=>setAssetFilter(f)} style={{
+                  background:assetFilter===f?`${T.accent}18`:T.surface,
+                  color:assetFilter===f?T.accent:T.muted2,
+                  border:`1px solid ${assetFilter===f?T.accent+"44":T.border}`,
+                  borderRadius:7,padding:"4px 10px",cursor:"pointer",
+                  fontSize:11,fontWeight:700
+                }}>{f}</button>
+              ))}
+            </div>
+          </div>
+
+          {/* table header */}
+          <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr 1fr 80px",
+            padding:"8px 12px",background:T.surface,borderRadius:8,marginBottom:6}}>
+            {["Asset","Tipo","Quantita","Prezzo Medio","Prezzo Att.","Variazione","Valore"].map((h,i)=>(
+              <div key={i} style={{color:T.muted,fontSize:9,fontWeight:800,
+                textTransform:"uppercase",letterSpacing:"0.08em",
+                textAlign:i===0?"left":"right"}}>{h}</div>
+            ))}
+          </div>
+
+          {filteredAssets.map((h,i)=>{
+            const sparkData = Array.from({length:10},(_,j)=>
+              h.price*(0.95+j*0.005+Math.random()*0.01));
+            return (
+              <div key={h.id} style={{display:"grid",
+                gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr 1fr 80px",
+                padding:"10px 12px",
+                borderBottom:i<filteredAssets.length-1?`1px solid ${T.border}`:"none",
+                alignItems:"center"}}>
+                {/* asset name */}
+                <div style={{display:"flex",alignItems:"center",gap:10}}>
+                  <div style={{width:32,height:32,borderRadius:8,
+                    background:`${h.color}22`,display:"flex",alignItems:"center",
+                    justifyContent:"center",color:h.color,fontWeight:900,fontSize:10,flexShrink:0}}>
+                    {h.ticker.slice(0,3)}
+                  </div>
+                  <div>
+                    <div style={{fontWeight:700,fontSize:13}}>{h.name}</div>
+                    <div style={{color:T.muted2,fontSize:10}}>{h.ticker}</div>
+                  </div>
+                </div>
+                <div style={{textAlign:"right"}}>
+                  <span style={{background:`${ASSET_TYPE_COLORS[h.type]||T.muted}18`,
+                    color:ASSET_TYPE_COLORS[h.type]||T.muted,
+                    border:`1px solid ${ASSET_TYPE_COLORS[h.type]||T.muted}33`,
+                    borderRadius:5,padding:"2px 6px",fontSize:9,fontWeight:800}}>{h.type}</span>
+                </div>
+                <div style={{textAlign:"right",color:T.muted2,fontSize:12}}>{h.quantity}</div>
+                <div style={{textAlign:"right",color:T.muted2,fontSize:12}}>{fmtEur(h.avgCost)}</div>
+                <div style={{textAlign:"right",fontWeight:600,fontSize:12}}>{fmtEur(h.price)}</div>
+                <div style={{textAlign:"right",color:clr(h.plPct),fontWeight:700,fontSize:12}}>
+                  {h.plPct>=0?"+":""}{h.plPct.toFixed(2)}%
+                  <div style={{display:"flex",justifyContent:"flex-end",marginTop:2}}>
+                    <Sparkline data={sparkData} color={clr(h.plPct)} height={20}/>
+                  </div>
+                </div>
+                <div style={{textAlign:"right",fontWeight:700,fontSize:12}}>{fmtEur(h.current)}</div>
+              </div>
+            );
+          })}
+
+          <div style={{marginTop:14,textAlign:"center"}}>
+            <button style={{background:"none",border:"none",color:T.accent,
+              fontSize:12,fontWeight:700,cursor:"pointer"}}>
+              Vedi tutti gli asset →
+            </button>
+          </div>
+        </div>
+
+        {/* Calendar + Sentiment */}
+        <div style={{display:"flex",flexDirection:"column",gap:14}}>
+
+          {/* Economic Calendar */}
+          <div style={{background:T.card,borderRadius:20,padding:"20px",
+            border:`1px solid ${T.border}`}}>
+            <div style={{color:T.muted2,fontSize:10,fontWeight:700,
+              textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:14}}>
+              Calendario Economico
+            </div>
+            {CALENDAR.map((ev,i)=>(
+              <div key={i} style={{display:"flex",gap:10,alignItems:"flex-start",
+                padding:"8px 0",borderBottom:i<CALENDAR.length-1?`1px solid ${T.border}`:"none"}}>
+                <div style={{textAlign:"center",minWidth:40}}>
+                  <div style={{color:T.accent,fontWeight:700,fontSize:11}}>{ev.time}</div>
+                  <div style={{color:T.muted,fontSize:9}}>{ev.day}</div>
+                </div>
+                <div style={{fontSize:11}}>{ev.flag}</div>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:11,fontWeight:600}}>{ev.event}</div>
+                  <span style={{
+                    background:ev.impact==="Alto"?`${T.red}18`:`${T.yellow}18`,
+                    color:ev.impact==="Alto"?T.red:T.yellow,
+                    border:`1px solid ${ev.impact==="Alto"?T.red:T.yellow}33`,
+                    borderRadius:4,padding:"1px 5px",fontSize:8,fontWeight:800
+                  }}>Impatto {ev.impact}</span>
+                </div>
+              </div>
+            ))}
+            <button style={{background:"none",border:"none",color:T.accent,
+              fontSize:11,fontWeight:700,cursor:"pointer",marginTop:10,width:"100%",textAlign:"center"}}>
+              Vedi calendario completo →
+            </button>
+          </div>
+
+          {/* Market Sentiment */}
+          <div style={{background:T.card,borderRadius:20,padding:"20px",
+            border:`1px solid ${T.border}`,textAlign:"center"}}>
+            <div style={{color:T.muted2,fontSize:10,fontWeight:700,
+              textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:14}}>
+              Sentiment di Mercato
+            </div>
+            <Gauge value={sentimentScore} color={T.green} size={140}/>
+            <div style={{fontSize:40,fontWeight:900,color:T.green,marginTop:-24,lineHeight:1}}>
+              {sentimentScore}
+            </div>
+            <div style={{color:T.green,fontSize:14,fontWeight:700,marginTop:6}}>{sentimentLabel}</div>
+            <div style={{color:T.muted2,fontSize:11,marginTop:6}}>
+              Il sentiment di mercato e positivo
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-// ─── HOLDINGS PAGE ─────────────────────────────────────────────────────────────
 function HoldingsPage({ holdings }) {
   const [sort, setSort] = useState("value");
   const totalCurrent = holdings.reduce((s,h) => s + h.current, 0);
@@ -1299,6 +1637,7 @@ function SettingsPage() {
 export default function Portly() {
   const [page, setPage] = useState("dashboard");
   const holdings = useMemo(() => calcHoldings(ASSETS), []);
+  const { cryptoData, loading: cryptoLoading, lastUpdated, refetch } = useCryptoPrices();
 
   const totalCurrent  = holdings.reduce((s,h)=>s+h.current,0);
   const totalPL       = holdings.reduce((s,h)=>s+h.pl,0);
@@ -1387,7 +1726,7 @@ export default function Portly() {
 
       {/* ── MAIN CONTENT ────────────────────────────────────────────────── */}
       <div style={{ marginLeft:220, flex:1, padding:"28px 28px", minHeight:"100vh", overflowX:"hidden" }}>
-        {page === "dashboard"    && <DashboardPage holdings={holdings}/>}
+        {page === "dashboard"    && <DashboardPage holdings={holdings} cryptoData={cryptoData} cryptoLoading={cryptoLoading} lastUpdated={lastUpdated} refetch={refetch}/>}
         {page === "holdings"     && <HoldingsPage holdings={holdings}/>}
         {page === "transactions" && <TransactionsPage/>}
         {page === "analytics"    && <AnalyticsPage holdings={holdings}/>}
