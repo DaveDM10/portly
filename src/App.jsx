@@ -51,18 +51,18 @@ const SNAPSHOTS = buildSnapshots();
 
 // ─── BENCHMARK DATA ──────────────────────────────────────────────────────────
 const BENCHMARKS = {
-  sp500:    { label:'S&P 500',      color:'#f97316', data:[100,104,101,108,115,112,120,126,123,132,138,142] },
-  msci:     { label:'MSCI World',   color:'#a855f7', data:[100,103,100,106,112,109,117,122,119,127,133,136] },
-  nasdaq:   { label:'Nasdaq 100',   color:'#00c2ff', data:[100,107,103,114,125,118,132,141,136,152,162,168] },
-  gold:     { label:'Gold',         color:'#ffd166', data:[100,102,104,103,106,108,107,110,112,111,114,116] },
-  btc:      { label:'Bitcoin',      color:'#f59e0b', data:[100,118,95,130,158,142,175,190,165,210,235,248] },
-  eth:      { label:'Ethereum',     color:'#6366f1', data:[100,115,90,125,150,135,168,182,158,198,220,235] },
-  sp500val: { label:'S&P Value',    color:'#10b981', data:[100,102,100,104,108,106,110,113,111,116,119,121] },
-  eurostoxx:{ label:'Euro Stoxx 50',color:'#ec4899', data:[100,103,101,105,110,107,112,116,113,119,123,125] },
-  bonds:    { label:'Bond Agg',     color:'#6b7799', data:[100,101,99,100,101,100,101,102,101,102,103,103] },
-  realestate:{ label:'Real Estate', color:'#84cc16', data:[100,101,99,102,105,103,107,109,107,111,113,114] },
-  emerging: { label:'Emerging Mkt', color:'#14b8a6', data:[100,105,99,108,116,110,119,125,120,130,136,139] },
-  vwce:     { label:'VWCE',         color:'#8b5cf6', data:[100,103,100,106,112,108,117,122,118,127,132,135] },
+  sp500:     { label:'S&P 500',      color:'#f97316', isin:'IE00B5BMR087', desc:'500 maggiori aziende USA quotate al NYSE/NASDAQ. Il benchmark azionario più seguito al mondo.', data:[100,104,101,108,115,112,120,126,123,132,138,142] },
+  msci:      { label:'MSCI World',   color:'#a855f7', isin:'IE00B4L5Y983', desc:'1.400+ aziende in 23 paesi sviluppati. Copre circa l'85% della capitalizzazione mondiale.', data:[100,103,100,106,112,109,117,122,119,127,133,136] },
+  nasdaq:    { label:'Nasdaq 100',   color:'#00c2ff', isin:'IE0032077012',  desc:'100 maggiori aziende non-finanziarie del Nasdaq. Alto peso su tech (Apple, Microsoft, Nvidia).', data:[100,107,103,114,125,118,132,141,136,152,162,168] },
+  gold:      { label:'Gold',         color:'#ffd166', isin:'IE00B579F325', desc:'Oro fisico. Bassa correlazione con azioni, usato come riserva di valore e hedging.', data:[100,102,104,103,106,108,107,110,112,111,114,116] },
+  btc:       { label:'Bitcoin',      color:'#f59e0b', isin:'N/A — spot',   desc:'Prima criptovaluta per capitalizzazione. Alta volatilità, bassa correlazione con asset tradizionali.', data:[100,118,95,130,158,142,175,190,165,210,235,248] },
+  eth:       { label:'Ethereum',     color:'#6366f1', isin:'N/A — spot',   desc:'Seconda crypto per capitalizzazione. Piattaforma smart contract, base del settore DeFi/NFT.', data:[100,115,90,125,150,135,168,182,158,198,220,235] },
+  sp500val:  { label:'S&P Value',    color:'#10b981', isin:'IE00B3VVMM84', desc:'Azioni S&P 500 a basso P/E (valore). Tende a sovraperformare in fasi di rialzo dei tassi.', data:[100,102,100,104,108,106,110,113,111,116,119,121] },
+  eurostoxx: { label:'Euro Stoxx 50',color:'#ec4899', isin:'IE00B53L3W79', desc:'50 blue chip dell'Eurozona. Esposizione a Francia, Germania, Spagna, Italia e altri.', data:[100,103,101,105,110,107,112,116,113,119,123,125] },
+  bonds:     { label:'Bond Agg',     color:'#6b7799', isin:'IE00B3F81409', desc:'Obbligazioni globali investment grade. Bassa volatilità, utile per diversificare il rischio.', data:[100,101,99,100,101,100,101,102,101,102,103,103] },
+  realestate:{ label:'Real Estate',  color:'#84cc16', isin:'IE00B1FZS244', desc:'REIT globali — immobiliare quotato. Buona fonte di dividendi, correlato ai tassi di interesse.', data:[100,101,99,102,105,103,107,109,107,111,113,114] },
+  emerging:  { label:'Emerging Mkt', color:'#14b8a6', isin:'IE00B4L5YC18', desc:'Mercati emergenti (Cina, India, Brasile…). Alto potenziale, alta volatilità e rischio geopolitico.', data:[100,105,99,108,116,110,119,125,120,130,136,139] },
+  vwce:      { label:'VWCE',         color:'#8b5cf6', isin:'IE00BK5BQT80', desc:'Vanguard FTSE All-World. ~3.700 aziende in paesi sviluppati ed emergenti. ETF per eccellenza del lazy investing.', data:[100,103,100,106,112,108,117,122,118,127,132,135] },
 };
 
 const DEFAULT_BENCHMARKS = ["msci", "sp500", "nasdaq", "gold"];
@@ -201,6 +201,42 @@ function Badge({ label, color }) {
       borderRadius:6, padding:"2px 8px", fontSize:10, fontWeight:800,
       letterSpacing:"0.08em", textTransform:"uppercase", whiteSpace:"nowrap"
     }}>{label}</span>
+  );
+}
+
+// ─── INFO TOOLTIP ─────────────────────────────────────────────────────────────
+function InfoTooltip({ isin, desc }) {
+  const [show, setShow] = useState(false);
+  return (
+    <div style={{ position:"relative", display:"inline-flex" }}
+      onMouseEnter={()=>setShow(true)}
+      onMouseLeave={()=>setShow(false)}>
+      <span style={{
+        width:15, height:15, borderRadius:"50%",
+        background:T.border2, color:T.muted2,
+        display:"inline-flex", alignItems:"center", justifyContent:"center",
+        fontSize:9, fontWeight:900, cursor:"default", flexShrink:0,
+        border:`1px solid ${T.border2}`, lineHeight:1
+      }}>i</span>
+      {show && (
+        <div style={{
+          position:"absolute", left:"calc(100% + 8px)", top:"50%", transform:"translateY(-50%)",
+          background:T.surface, border:`1px solid ${T.border2}`,
+          borderRadius:12, padding:"12px 14px", zIndex:300,
+          width:240, boxShadow:"0 12px 40px #000e",
+          pointerEvents:"none"
+        }}>
+          <div style={{ color:T.text, fontSize:12, lineHeight:1.6, marginBottom:8 }}>{desc}</div>
+          <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+            <span style={{ color:T.muted, fontSize:10, fontWeight:700,
+              textTransform:"uppercase", letterSpacing:"0.08em" }}>ISIN</span>
+            <span style={{ color:T.accent, fontSize:11, fontWeight:700,
+              background:`${T.accent}12`, borderRadius:5, padding:"2px 7px",
+              border:`1px solid ${T.accent}22` }}>{isin}</span>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -412,6 +448,7 @@ function DashboardPage({ holdings }) {
                             <span style={{ width:10,height:10,borderRadius:3,
                               background:b.color,display:"inline-block",flexShrink:0 }}/>
                             {b.label}
+                            <InfoTooltip isin={b.isin} desc={b.desc}/>
                           </div>
                           {active && <span style={{ fontSize:14, fontWeight:900 }}>✓</span>}
                         </button>
