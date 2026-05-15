@@ -448,7 +448,7 @@ const NAV = [
 // ══════════════════════════════════════════════════════════════════════════════
 
 // ─── DASHBOARD PAGE ───────────────────────────────────────────────────────────
-function DashboardPage({ holdings, cryptoData, cryptoLoading, lastUpdated, refetch }) {
+function DashboardPage({ holdings, cryptoData, cryptoLoading, lastUpdated, refetch, isMobile=false }) {
   const [tf, setTf] = useState("1A");
   const [assetFilter, setAssetFilter] = useState("Tutti");
   const [marketOpen] = useState(true);
@@ -673,10 +673,10 @@ function DashboardPage({ holdings, cryptoData, cryptoLoading, lastUpdated, refet
       </div>
 
       {/* ── MAIN GRID ──────────────────────────────────────────────────── */}
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 300px", gap:14, marginBottom:14 }}>
+      <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 300px", gap:14, marginBottom:14 }}>
 
         {/* ── PORTFOLIO VALUE CHART (spans 2 cols) ── */}
-        <div style={{ gridColumn:"1/3", background:T.card, borderRadius:20,
+        <div style={{ gridColumn: isMobile ? "1" : "1/3", background:T.card, borderRadius:20,
           padding:"24px", border:`1px solid ${T.border}` }}>
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:16 }}>
             <div>
@@ -693,7 +693,8 @@ function DashboardPage({ holdings, cryptoData, cryptoLoading, lastUpdated, refet
             </div>
             {/* timeframe tabs */}
             <div style={{ display:"flex", gap:2, background:T.surface,
-              borderRadius:10, padding:3, border:`1px solid ${T.border}` }}>
+              borderRadius:10, padding:3, border:`1px solid ${T.border}`,
+              overflowX:"auto", maxWidth: isMobile ? 220 : "none" }}>
               {["1G","3G","1S","1M","3M","6M","YTD","1A","2A","5A"].map(t=>(
                 <button key={t} onClick={()=>setTf(t)} style={{
                   background:tf===t?T.card:"transparent",
@@ -763,7 +764,7 @@ function DashboardPage({ holdings, cryptoData, cryptoLoading, lastUpdated, refet
       </div>
 
       {/* ── KPI CARDS ROW ──────────────────────────────────────────────── */}
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:14, marginBottom:14 }}>
+      <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(4,1fr)", gap:14, marginBottom:14 }}>
         {[
           { label:"Guadagno Giornaliero", value:fmtEur(dailyPL), sub:`+${dailyPLpct}%`, color:T.green, spark:sparkDaily },
           { label:`Guadagno (${tf})`, value:(periodStats.pl>=0?"+":"")+fmtEur(Math.abs(periodStats.pl)), sub:(periodStats.pl>=0?"+":"")+periodStats.plPct.toFixed(2)+"%", color:clr(periodStats.pl), spark:sparkTotal },
@@ -786,7 +787,7 @@ function DashboardPage({ holdings, cryptoData, cryptoLoading, lastUpdated, refet
       </div>
 
       {/* ── SECOND ROW: Risk + Sector + AI Insights + Indices ─────────── */}
-      <div style={{ display:"grid", gridTemplateColumns:"200px 1fr 260px 220px", gap:14, marginBottom:14 }}>
+      <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "200px 1fr 260px 220px", gap:14, marginBottom:14 }}>
 
         {/* Risk Score */}
         <div style={{background:T.card,borderRadius:20,padding:"20px",
@@ -898,7 +899,7 @@ function DashboardPage({ holdings, cryptoData, cryptoLoading, lastUpdated, refet
       </div>
 
       {/* ── ASSETS TABLE + CALENDAR + SENTIMENT ───────────────────────── */}
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 300px", gap:14 }}>
+      <div style={{ display:"grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 300px", gap:14 }}>
 
         {/* Assets Table */}
         <div style={{background:T.card,borderRadius:20,padding:"22px",
@@ -1636,8 +1637,22 @@ function SettingsPage() {
 // ══════════════════════════════════════════════════════════════════════════════
 export default function Portly() {
   const [page, setPage] = useState("dashboard");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const holdings = useMemo(() => calcHoldings(ASSETS), []);
   const { cryptoData, loading: cryptoLoading, lastUpdated, refetch } = useCryptoPrices();
+
+  // Responsive listener
+  useState(() => {
+    const handler = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (mobile) setSidebarCollapsed(true);
+    };
+    window.addEventListener('resize', handler);
+    if (window.innerWidth < 768) setSidebarCollapsed(true);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
 
   const totalCurrent  = holdings.reduce((s,h)=>s+h.current,0);
   const totalPL       = holdings.reduce((s,h)=>s+h.pl,0);
@@ -1649,89 +1664,179 @@ export default function Portly() {
       fontFamily:"'Sora', 'DM Sans', 'Segoe UI', sans-serif",
       display:"flex"
     }}>
+      {/* ── MOBILE TOP NAV ──────────────────────────────────────────────── */}
+      {isMobile && (
+        <div style={{
+          position:"fixed", top:0, left:0, right:0, zIndex:200,
+          background:T.surface, borderBottom:`1px solid ${T.border}`,
+          display:"flex", alignItems:"center", justifyContent:"space-between",
+          padding:"12px 16px", height:56
+        }}>
+          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+            <img src="/portly-logo.png" alt="Portly" style={{ width:28, height:28, borderRadius:8, objectFit:"cover" }}
+              onError={e=>{ e.target.style.display="none"; }}/>
+            <span style={{ fontWeight:900, fontSize:18, letterSpacing:"-0.03em" }}>Portly</span>
+          </div>
+          <div style={{ display:"flex", gap:4 }}>
+            {NAV.map(n=>(
+              <button key={n.key} onClick={()=>setPage(n.key)} style={{
+                background: page===n.key ? `${T.accent}22` : "transparent",
+                color: page===n.key ? T.accent : T.muted2,
+                border:"none", borderRadius:8, padding:"6px 8px",
+                cursor:"pointer", fontSize:16
+              }}>{n.icon}</button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* ── SIDEBAR ─────────────────────────────────────────────────────── */}
-      <div style={{
-        width:220, background:T.surface,
-        borderRight:`1px solid ${T.border}`,
-        display:"flex", flexDirection:"column",
-        position:"fixed", top:0, left:0, height:"100vh",
-        zIndex:100, flexShrink:0
-      }}>
-        {/* logo */}
-        <div style={{ padding:"24px 20px 20px", borderBottom:`1px solid ${T.border}` }}>
-          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-            <div style={{
-              width:36, height:36, borderRadius:10,
-              background:`linear-gradient(135deg,${T.accent},${T.accent2})`,
+      {!isMobile && (
+        <div style={{
+          width: sidebarCollapsed ? 64 : 220,
+          background:T.surface,
+          borderRight:`1px solid ${T.border}`,
+          display:"flex", flexDirection:"column",
+          position:"fixed", top:0, left:0, height:"100vh",
+          zIndex:100, flexShrink:0,
+          transition:"width 0.25s cubic-bezier(.4,0,.2,1)",
+          overflow:"hidden"
+        }}>
+          {/* logo + collapse button */}
+          <div style={{ padding: sidebarCollapsed ? "20px 14px" : "18px 16px 16px",
+            borderBottom:`1px solid ${T.border}`,
+            display:"flex", alignItems:"center",
+            justifyContent: sidebarCollapsed ? "center" : "space-between" }}>
+            {!sidebarCollapsed && (
+              <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                <img src="/portly-logo.png" alt="Portly"
+                  style={{ width:32, height:32, borderRadius:8, objectFit:"cover" }}
+                  onError={e=>{ e.target.style.display="none"; e.target.nextSibling.style.display="flex"; }}/>
+                <div style={{ width:32, height:32, borderRadius:8, display:"none",
+                  background:`linear-gradient(135deg,${T.accent},${T.accent2})`,
+                  alignItems:"center", justifyContent:"center",
+                  fontWeight:900, fontSize:16, color:"#fff" }}>P</div>
+                <span style={{ fontWeight:900, fontSize:18, letterSpacing:"-0.03em", whiteSpace:"nowrap" }}>
+                  Portly
+                </span>
+              </div>
+            )}
+            {sidebarCollapsed && (
+              <img src="/portly-logo.png" alt="P"
+                style={{ width:32, height:32, borderRadius:8, objectFit:"cover" }}
+                onError={e=>{ e.target.style.display="none"; }}/>
+            )}
+            <button onClick={()=>setSidebarCollapsed(c=>!c)} style={{
+              background:T.border, border:"none", borderRadius:8,
+              width:26, height:26, cursor:"pointer", color:T.muted2,
               display:"flex", alignItems:"center", justifyContent:"center",
-              fontWeight:900, fontSize:18, color:"#fff"
-            }}>P</div>
-            <span style={{ fontWeight:900, fontSize:20, letterSpacing:"-0.03em" }}>
-              Portly
-            </span>
-          </div>
-        </div>
-
-        {/* portfolio mini card */}
-        <div style={{ padding:"16px", borderBottom:`1px solid ${T.border}` }}>
-          <div style={{ background:T.card, borderRadius:12, padding:"14px",
-            border:`1px solid ${T.border}` }}>
-            <div style={{ color:T.muted2, fontSize:10, fontWeight:700,
-              textTransform:"uppercase", letterSpacing:"0.1em", marginBottom:6 }}>
-              Totale
-            </div>
-            <div style={{ fontWeight:900, fontSize:18, letterSpacing:"-0.02em" }}>
-              {fmtEur(totalCurrent)}
-            </div>
-            <div style={{ color:clr(totalPLpct), fontSize:12, fontWeight:700, marginTop:4 }}>
-              {sign(totalPLpct)} {fmtPct(totalPLpct)}
-            </div>
-          </div>
-        </div>
-
-        {/* nav */}
-        <nav style={{ flex:1, padding:"12px 10px" }}>
-          {NAV.map(n => (
-            <button key={n.key} onClick={()=>setPage(n.key)} style={{
-              display:"flex", alignItems:"center", gap:12,
-              width:"100%", padding:"11px 12px", borderRadius:12,
-              background: page===n.key ? `${T.accent}18` : "transparent",
-              color: page===n.key ? T.accent : T.muted2,
-              border: page===n.key ? `1px solid ${T.accent}33` : "1px solid transparent",
-              cursor:"pointer", marginBottom:4, fontWeight: page===n.key ? 700 : 500,
-              fontSize:13, textAlign:"left", transition:"all .15s"
+              fontSize:12, flexShrink:0, marginLeft: sidebarCollapsed ? 0 : 4
             }}>
-              <span style={{ fontSize:16, width:20, textAlign:"center" }}>{n.icon}</span>
-              {n.label}
+              {sidebarCollapsed ? "▶" : "◀"}
             </button>
-          ))}
-        </nav>
+          </div>
 
-        {/* bottom */}
-        <div style={{ padding:"16px", borderTop:`1px solid ${T.border}` }}>
-          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-            <div style={{
-              width:32, height:32, borderRadius:8,
-              background:`linear-gradient(135deg,${T.accent},${T.purple})`,
-              display:"flex", alignItems:"center",
-              justifyContent:"center", fontWeight:900, fontSize:13
-            }}>U</div>
-            <div>
-              <div style={{ fontWeight:700, fontSize:12 }}>User</div>
-              <div style={{ color:T.muted2, fontSize:10 }}>Piano Free</div>
+          {/* portfolio mini card */}
+          {!sidebarCollapsed && (
+            <div style={{ padding:"12px 14px", borderBottom:`1px solid ${T.border}` }}>
+              <div style={{ background:T.card, borderRadius:12, padding:"12px",
+                border:`1px solid ${T.border}` }}>
+                <div style={{ color:T.muted2, fontSize:9, fontWeight:700,
+                  textTransform:"uppercase", letterSpacing:"0.1em", marginBottom:4 }}>Totale</div>
+                <div style={{ fontWeight:900, fontSize:16, letterSpacing:"-0.02em" }}>
+                  {fmtEur(totalCurrent)}
+                </div>
+                <div style={{ color:clr(totalPLpct), fontSize:11, fontWeight:700, marginTop:3 }}>
+                  {sign(totalPLpct)} {fmtPct(totalPLpct)}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* nav */}
+          <nav style={{ flex:1, padding: sidebarCollapsed ? "12px 8px" : "12px 10px" }}>
+            {NAV.map(n => (
+              <button key={n.key} onClick={()=>setPage(n.key)}
+                title={sidebarCollapsed ? n.label : ""}
+                style={{
+                  display:"flex", alignItems:"center",
+                  gap: sidebarCollapsed ? 0 : 12,
+                  justifyContent: sidebarCollapsed ? "center" : "flex-start",
+                  width:"100%", padding: sidebarCollapsed ? "12px 0" : "11px 12px",
+                  borderRadius:12,
+                  background: page===n.key ? `${T.accent}18` : "transparent",
+                  color: page===n.key ? T.accent : T.muted2,
+                  border: page===n.key ? `1px solid ${T.accent}33` : "1px solid transparent",
+                  cursor:"pointer", marginBottom:4,
+                  fontWeight: page===n.key ? 700 : 500,
+                  fontSize:13, textAlign:"left", transition:"all .15s",
+                  whiteSpace:"nowrap", overflow:"hidden"
+                }}>
+                <span style={{ fontSize:18, width:20, textAlign:"center", flexShrink:0 }}>{n.icon}</span>
+                {!sidebarCollapsed && n.label}
+              </button>
+            ))}
+          </nav>
+
+          {/* bottom user */}
+          <div style={{ padding: sidebarCollapsed ? "12px 8px" : "14px",
+            borderTop:`1px solid ${T.border}` }}>
+            <div style={{ display:"flex", alignItems:"center",
+              gap: sidebarCollapsed ? 0 : 10,
+              justifyContent: sidebarCollapsed ? "center" : "flex-start" }}>
+              <div style={{
+                width:30, height:30, borderRadius:8, flexShrink:0,
+                background:`linear-gradient(135deg,${T.accent},${T.purple})`,
+                display:"flex", alignItems:"center",
+                justifyContent:"center", fontWeight:900, fontSize:13
+              }}>D</div>
+              {!sidebarCollapsed && (
+                <div>
+                  <div style={{ fontWeight:700, fontSize:12 }}>Davide</div>
+                  <div style={{ color:T.muted2, fontSize:10 }}>Piano Free</div>
+                </div>
+              )}
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* ── MAIN CONTENT ────────────────────────────────────────────────── */}
-      <div style={{ marginLeft:220, flex:1, padding:"28px 28px", minHeight:"100vh", overflowX:"hidden" }}>
-        {page === "dashboard"    && <DashboardPage holdings={holdings} cryptoData={cryptoData} cryptoLoading={cryptoLoading} lastUpdated={lastUpdated} refetch={refetch}/>}
+      <div style={{
+        marginLeft: isMobile ? 0 : (sidebarCollapsed ? 64 : 220),
+        flex:1,
+        padding: isMobile ? "68px 14px 80px" : "24px 28px",
+        minHeight:"100vh", overflowX:"hidden",
+        transition:"margin-left 0.25s cubic-bezier(.4,0,.2,1)"
+      }}>
+        {page === "dashboard"    && <DashboardPage holdings={holdings} cryptoData={cryptoData} cryptoLoading={cryptoLoading} lastUpdated={lastUpdated} refetch={refetch} isMobile={isMobile}/>}
         {page === "holdings"     && <HoldingsPage holdings={holdings}/>}
         {page === "transactions" && <TransactionsPage/>}
         {page === "analytics"    && <AnalyticsPage holdings={holdings}/>}
         {page === "settings"     && <SettingsPage/>}
       </div>
+
+      {/* ── MOBILE BOTTOM NAV ───────────────────────────────────────────── */}
+      {isMobile && (
+        <div style={{
+          position:"fixed", bottom:0, left:0, right:0, zIndex:200,
+          background:T.surface, borderTop:`1px solid ${T.border}`,
+          display:"flex", padding:"8px 0 12px"
+        }}>
+          {NAV.map(n=>(
+            <button key={n.key} onClick={()=>setPage(n.key)} style={{
+              flex:1, display:"flex", flexDirection:"column",
+              alignItems:"center", gap:3,
+              background:"none", border:"none", cursor:"pointer",
+              color: page===n.key ? T.accent : T.muted2,
+              fontSize:10, fontWeight: page===n.key ? 700 : 500
+            }}>
+              <span style={{ fontSize:20 }}>{n.icon}</span>
+              <span>{n.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
