@@ -448,12 +448,630 @@ const NAV = [
 // ══════════════════════════════════════════════════════════════════════════════
 
 // ─── DASHBOARD PAGE ───────────────────────────────────────────────────────────
+
+// ─── STOCK SEARCH DATABASE ────────────────────────────────────────────────────
+const STOCK_DB = {
+  "AAPL": {
+    ticker:"AAPL", name:"Apple Inc.", exchange:"NASDAQ", sector:"Technology",
+    industry:"Consumer Electronics", country:"USA", currency:"USD",
+    price:192.80, change:+1.24, changePct:+0.65,
+    mktCap:"2.98T", peRatio:31.2, eps:6.18, forwardPE:28.4,
+    divYield:"0.52%", annualDiv:"1.00", payoutRatio:"14.6%", exDivDate:"10 Feb 2025",
+    week52High:199.62, week52Low:164.08, avgVolume:"58.2M", beta:1.24,
+    roe:"147.9%", roa:"28.3%", debtEquity:1.77, currentRatio:0.99,
+    grossMargin:"46.2%", operatingMargin:"30.8%", netMargin:"25.3%",
+    revenueGrowth:"+2.0%", epsGrowth:"+13.1%",
+    fairValue:246.82, analystTarget:235.50, analystRating:"Buy",
+    moatScore:85, financialScore:78, growthScore:71,
+    description:"Apple progetta, produce e vende smartphone, computer, tablet, wearable e accessori. E leader mondiale per capitalizzazione nel settore tech.",
+    revenue:  [274,366,394,383,391],
+    earnings: [57,95,99,97,100],
+    years:    ["2020","2021","2022","2023","2024"],
+    priceHistory: [148,158,142,162,175,168,180,188,175,190,195,193],
+  },
+  "MSFT": {
+    ticker:"MSFT", name:"Microsoft Corp.", exchange:"NASDAQ", sector:"Technology",
+    industry:"Software — Infrastructure", country:"USA", currency:"USD",
+    price:378.40, change:+2.10, changePct:+0.56,
+    mktCap:"2.81T", peRatio:35.8, eps:10.57, forwardPE:31.2,
+    divYield:"0.74%", annualDiv:"3.00", payoutRatio:"25.1%", exDivDate:"15 Feb 2025",
+    week52High:420.82, week52Low:309.45, avgVolume:"22.1M", beta:0.90,
+    roe:"38.5%", roa:"18.4%", debtEquity:0.36, currentRatio:1.77,
+    grossMargin:"69.8%", operatingMargin:"44.6%", netMargin:"35.8%",
+    revenueGrowth:"+15.7%", epsGrowth:"+20.4%",
+    fairValue:395.40, analystTarget:410.00, analystRating:"Strong Buy",
+    moatScore:92, financialScore:88, growthScore:82,
+    description:"Microsoft sviluppa software, servizi cloud (Azure), hardware e soluzioni AI. Tra le aziende piu profittevoli al mondo con forte crescita cloud.",
+    revenue:  [143,168,198,212,245],
+    earnings: [44,62,73,72,88],
+    years:    ["2020","2021","2022","2023","2024"],
+    priceHistory: [220,240,280,310,340,320,355,370,360,378,382,378],
+  },
+  "VWCE": {
+    ticker:"VWCE", name:"Vanguard FTSE All-World", exchange:"Euronext", sector:"ETF",
+    industry:"Global Equity ETF", country:"Ireland", currency:"EUR",
+    price:113.60, change:+0.82, changePct:+0.73,
+    mktCap:"18.2B AUM", peRatio:18.4, eps:"N/A", forwardPE:17.1,
+    divYield:"1.52%", annualDiv:"1.72", payoutRatio:"N/A", exDivDate:"25 Mar 2025",
+    week52High:118.40, week52Low:92.60, avgVolume:"1.2M", beta:0.98,
+    roe:"N/A", roa:"N/A", debtEquity:"N/A", currentRatio:"N/A",
+    grossMargin:"N/A", operatingMargin:"N/A", netMargin:"N/A",
+    revenueGrowth:"+12.4%", epsGrowth:"N/A",
+    fairValue:"N/A", analystTarget:"N/A", analystRating:"N/A",
+    moatScore:null, financialScore:null, growthScore:null,
+    description:"ETF che replica l'indice FTSE All-World. Copre circa 3.700 aziende in oltre 50 paesi sviluppati ed emergenti. TER 0.22%. Ideale per lazy investing.",
+    revenue:  [68,78,88,96,106],
+    earnings: [68,78,88,96,106],
+    years:    ["2020","2021","2022","2023","2024"],
+    priceHistory: [74,82,88,95,90,95,100,105,102,108,112,114],
+  },
+  "CSPX": {
+    ticker:"CSPX", name:"iShares Core S&P 500", exchange:"LSE", sector:"ETF",
+    industry:"US Equity ETF", country:"Ireland", currency:"USD",
+    price:516.20, change:+3.40, changePct:+0.66,
+    mktCap:"78.4B AUM", peRatio:22.1, eps:"N/A", forwardPE:20.8,
+    divYield:"1.28%", annualDiv:"6.60", payoutRatio:"N/A", exDivDate:"20 Mar 2025",
+    week52High:528.60, week52Low:388.40, avgVolume:"820K", beta:1.00,
+    roe:"N/A", roa:"N/A", debtEquity:"N/A", currentRatio:"N/A",
+    grossMargin:"N/A", operatingMargin:"N/A", netMargin:"N/A",
+    revenueGrowth:"+24.2%", epsGrowth:"N/A",
+    fairValue:"N/A", analystTarget:"N/A", analystRating:"N/A",
+    moatScore:null, financialScore:null, growthScore:null,
+    description:"ETF che replica l'S&P 500. Investe nelle 500 maggiori aziende USA. TER 0.07%, tra i piu efficienti sul mercato. Accumulazione automatica dei dividendi.",
+    revenue:  [330,420,430,420,460],
+    earnings: [330,420,430,420,460],
+    years:    ["2020","2021","2022","2023","2024"],
+    priceHistory: [340,390,420,440,410,430,450,470,460,490,510,516],
+  },
+  "BTC": {
+    ticker:"BTC", name:"Bitcoin", exchange:"Crypto", sector:"Crypto",
+    industry:"Cryptocurrency", country:"Global", currency:"USD",
+    price:63200, change:+1240, changePct:+2.00,
+    mktCap:"1.24T", peRatio:"N/A", eps:"N/A", forwardPE:"N/A",
+    divYield:"N/A", annualDiv:"N/A", payoutRatio:"N/A", exDivDate:"N/A",
+    week52High:73750, week52Low:24800, avgVolume:"28.4B", beta:1.85,
+    roe:"N/A", roa:"N/A", debtEquity:"N/A", currentRatio:"N/A",
+    grossMargin:"N/A", operatingMargin:"N/A", netMargin:"N/A",
+    revenueGrowth:"N/A", epsGrowth:"N/A",
+    fairValue:"N/A", analystTarget:"N/A", analystRating:"N/A",
+    moatScore:null, financialScore:null, growthScore:null,
+    description:"Bitcoin e la prima e piu grande criptovaluta per capitalizzazione. Asset digitale decentralizzato con offerta massima di 21 milioni di BTC. Halving ogni ~4 anni.",
+    revenue:  [10800,28000,20000,16500,42000],
+    earnings: [10800,28000,20000,16500,42000],
+    years:    ["2020","2021","2022","2023","2024"],
+    priceHistory: [28000,35000,42000,38000,32000,28000,35000,42000,48000,56000,60000,63200],
+  },
+  "ETH": {
+    ticker:"ETH", name:"Ethereum", exchange:"Crypto", sector:"Crypto",
+    industry:"Smart Contract Platform", country:"Global", currency:"USD",
+    price:3120, change:+85, changePct:+2.80,
+    mktCap:"374B", peRatio:"N/A", eps:"N/A", forwardPE:"N/A",
+    divYield:"N/A", annualDiv:"N/A", payoutRatio:"N/A", exDivDate:"N/A",
+    week52High:4090, week52Low:1520, avgVolume:"12.8B", beta:1.92,
+    roe:"N/A", roa:"N/A", debtEquity:"N/A", currentRatio:"N/A",
+    grossMargin:"N/A", operatingMargin:"N/A", netMargin:"N/A",
+    revenueGrowth:"N/A", epsGrowth:"N/A",
+    fairValue:"N/A", analystTarget:"N/A", analystRating:"N/A",
+    moatScore:null, financialScore:null, growthScore:null,
+    description:"Ethereum e la principale piattaforma per smart contract e applicazioni decentralizzate (dApp). Usa Proof-of-Stake dal 2022. Base del settore DeFi e NFT.",
+    revenue:  [730,1480,1280,1200,2200],
+    earnings: [730,1480,1280,1200,2200],
+    years:    ["2020","2021","2022","2023","2024"],
+    priceHistory: [1480,1800,2200,2000,1600,1400,1800,2200,2600,2900,3000,3120],
+  },
+  "NVDA": {
+    ticker:"NVDA", name:"NVIDIA Corporation", exchange:"NASDAQ", sector:"Technology",
+    industry:"Semiconductors", country:"USA", currency:"USD",
+    price:875.40, change:+18.20, changePct:+2.12,
+    mktCap:"2.15T", peRatio:68.4, eps:12.80, forwardPE:38.2,
+    divYield:"0.04%", annualDiv:"0.16", payoutRatio:"1.0%", exDivDate:"05 Mar 2025",
+    week52High:974.00, week52Low:402.40, avgVolume:"42.8M", beta:1.68,
+    roe:"123.8%", roa:"55.4%", debtEquity:0.42, currentRatio:4.17,
+    grossMargin:"74.6%", operatingMargin:"64.9%", netMargin:"55.0%",
+    revenueGrowth:"+122.4%", epsGrowth:"+586.0%",
+    fairValue:920.00, analystTarget:1000.00, analystRating:"Strong Buy",
+    moatScore:94, financialScore:92, growthScore:98,
+    description:"NVIDIA e leader mondiale nelle GPU per gaming, AI e data center. I chip H100 e B100 sono alla base dell'infrastruttura AI globale. Crescita esplosiva dal 2023.",
+    revenue:  [16,26,27,44,96],
+    earnings: [4,8,10,16,53],
+    years:    ["2020","2021","2022","2023","2024"],
+    priceHistory: [480,520,580,620,680,720,780,820,860,880,870,875],
+  },
+  "XAUM": {
+    ticker:"XAUM", name:"Xtrackers Gold ETC", exchange:"Xetra", sector:"ETF",
+    industry:"Commodity ETC", country:"Germany", currency:"EUR",
+    price:198.40, change:+0.60, changePct:+0.30,
+    mktCap:"3.8B AUM", peRatio:"N/A", eps:"N/A", forwardPE:"N/A",
+    divYield:"0%", annualDiv:"0", payoutRatio:"N/A", exDivDate:"N/A",
+    week52High:214.20, week52Low:162.40, avgVolume:"180K", beta:0.12,
+    roe:"N/A", roa:"N/A", debtEquity:"N/A", currentRatio:"N/A",
+    grossMargin:"N/A", operatingMargin:"N/A", netMargin:"N/A",
+    revenueGrowth:"+18.4%", epsGrowth:"N/A",
+    fairValue:"N/A", analystTarget:"N/A", analystRating:"N/A",
+    moatScore:null, financialScore:null, growthScore:null,
+    description:"ETC che replica il prezzo dell oro fisico. 100% backed da oro custodito a Londra. TER 0.12%. Strumento per hedging contro inflazione e risk-off.",
+    revenue:  [155,180,175,168,192],
+    earnings: [155,180,175,168,192],
+    years:    ["2020","2021","2022","2023","2024"],
+    priceHistory: [160,172,180,182,175,172,178,184,188,192,196,198],
+  },
+};
+
+// Search across all stocks
+function searchStocks(query) {
+  if (!query || query.length < 1) return [];
+  const q = query.toLowerCase();
+  return Object.values(STOCK_DB).filter(s =>
+    s.ticker.toLowerCase().includes(q) ||
+    s.name.toLowerCase().includes(q) ||
+    s.sector.toLowerCase().includes(q)
+  ).slice(0, 6);
+}
+
+// ─── STOCK DETAIL MODAL ───────────────────────────────────────────────────────
+function StockModal({ stock, onClose }) {
+  const [activeTab, setActiveTab] = useState("overview");
+  const months = ["Gen","Feb","Mar","Apr","Mag","Giu","Lug","Ago","Set","Ott","Nov","Dic"];
+
+  const priceData = stock.priceHistory.map((v,i) => ({ date: months[i] || `M${i+1}`, value: v }));
+  const isETF = stock.sector === "ETF";
+  const isCrypto = stock.sector === "Crypto";
+
+  const plPct = stock.week52High && stock.week52Low
+    ? ((stock.price - stock.week52Low) / (stock.week52High - stock.week52Low) * 100)
+    : 0;
+
+  function ScoreGauge({ label, value, color }) {
+    if (!value) return null;
+    return (
+      <div style={{ flex:1, background:T.surface, borderRadius:12, padding:"14px", border:`1px solid ${T.border}`, textAlign:"center" }}>
+        <div style={{ color:T.muted2, fontSize:10, fontWeight:700, textTransform:"uppercase", letterSpacing:"0.08em", marginBottom:8 }}>{label}</div>
+        <div style={{ position:"relative", width:64, height:64, margin:"0 auto 8px" }}>
+          <svg width="64" height="64" viewBox="0 0 64 64">
+            <circle cx="32" cy="32" r="26" fill="none" stroke={T.border2} strokeWidth="6"/>
+            <circle cx="32" cy="32" r="26" fill="none" stroke={color} strokeWidth="6"
+              strokeDasharray={`${value/100*163.4} 163.4`}
+              strokeLinecap="round" transform="rotate(-90 32 32)"/>
+          </svg>
+          <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center",
+            fontWeight:900, fontSize:16, color }}>{value}</div>
+        </div>
+        <div style={{ color, fontSize:11, fontWeight:700 }}>
+          {value >= 80 ? "Eccellente" : value >= 65 ? "Buono" : value >= 50 ? "Discreto" : "Basso"}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{
+      position:"fixed", inset:0, zIndex:500,
+      background:"rgba(0,0,0,0.75)", backdropFilter:"blur(6px)",
+      display:"flex", alignItems:"center", justifyContent:"center",
+      padding:20
+    }} onClick={e=>{ if(e.target===e.currentTarget) onClose(); }}>
+      <div style={{
+        background:T.surface, borderRadius:24, border:`1px solid ${T.border2}`,
+        width:"100%", maxWidth:900, maxHeight:"90vh", overflow:"hidden",
+        display:"flex", flexDirection:"column", boxShadow:"0 32px 80px #000c"
+      }}>
+        {/* header */}
+        <div style={{
+          padding:"20px 24px", borderBottom:`1px solid ${T.border}`,
+          display:"flex", justifyContent:"space-between", alignItems:"center",
+          background:`linear-gradient(135deg,${T.card},${T.surface})`
+        }}>
+          <div style={{ display:"flex", alignItems:"center", gap:16 }}>
+            <div style={{
+              width:48, height:48, borderRadius:14,
+              background:`linear-gradient(135deg,${T.accent}44,${T.accent2}44)`,
+              border:`1px solid ${T.accent}33`,
+              display:"flex", alignItems:"center", justifyContent:"center",
+              fontWeight:900, fontSize:16, color:T.accent
+            }}>{stock.ticker.slice(0,3)}</div>
+            <div>
+              <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                <span style={{ fontWeight:900, fontSize:22, letterSpacing:"-0.02em" }}>{stock.ticker}</span>
+                <span style={{ color:T.muted2, fontSize:14 }}>{stock.name}</span>
+                <span style={{ background:`${T.accent}18`, color:T.accent, border:`1px solid ${T.accent}33`,
+                  borderRadius:6, padding:"2px 8px", fontSize:10, fontWeight:800 }}>{stock.exchange}</span>
+                <span style={{ background:`${T.purple}18`, color:T.purple, border:`1px solid ${T.purple}33`,
+                  borderRadius:6, padding:"2px 8px", fontSize:10, fontWeight:800 }}>{stock.sector}</span>
+              </div>
+              <div style={{ color:T.muted2, fontSize:12, marginTop:4 }}>{stock.industry} • {stock.country}</div>
+            </div>
+          </div>
+          <div style={{ display:"flex", alignItems:"center", gap:16 }}>
+            <div style={{ textAlign:"right" }}>
+              <div style={{ fontWeight:900, fontSize:26, letterSpacing:"-0.02em" }}>
+                {stock.currency === "USD" ? "$" : "€"}{typeof stock.price === "number" ? stock.price.toLocaleString("it-IT") : stock.price}
+              </div>
+              <div style={{ color:clr(stock.changePct), fontWeight:700, fontSize:14 }}>
+                {stock.changePct >= 0 ? "▲" : "▼"} {Math.abs(stock.changePct).toFixed(2)}% oggi
+              </div>
+            </div>
+            <button onClick={onClose} style={{
+              background:T.border, border:"none", borderRadius:10,
+              width:36, height:36, cursor:"pointer", color:T.muted2,
+              fontSize:18, display:"flex", alignItems:"center", justifyContent:"center"
+            }}>×</button>
+          </div>
+        </div>
+
+        {/* tabs */}
+        <div style={{ display:"flex", gap:4, padding:"12px 24px 0",
+          borderBottom:`1px solid ${T.border}`, background:T.surface }}>
+          {["overview","fondamentali","grafico","valutazione"].map(tab=>(
+            <button key={tab} onClick={()=>setActiveTab(tab)} style={{
+              background: activeTab===tab ? T.card : "transparent",
+              color: activeTab===tab ? T.accent : T.muted2,
+              border: activeTab===tab ? `1px solid ${T.border2}` : "1px solid transparent",
+              borderBottom: activeTab===tab ? `2px solid ${T.accent}` : "2px solid transparent",
+              borderRadius:"8px 8px 0 0", padding:"8px 16px", cursor:"pointer",
+              fontSize:12, fontWeight:700, textTransform:"capitalize",
+              transition:"all .15s"
+            }}>{tab.charAt(0).toUpperCase()+tab.slice(1)}</button>
+          ))}
+        </div>
+
+        {/* content */}
+        <div style={{ flex:1, overflowY:"auto", padding:"20px 24px" }}>
+
+          {/* ── OVERVIEW ── */}
+          {activeTab==="overview" && (
+            <div>
+              <p style={{ color:T.muted2, fontSize:13, lineHeight:1.7, marginBottom:20 }}>{stock.description}</p>
+
+              {/* key metrics grid */}
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:10, marginBottom:20 }}>
+                {[
+                  ["Mkt Cap", stock.mktCap],
+                  ["P/E Ratio", stock.peRatio],
+                  ["EPS", typeof stock.eps === "number" ? `$${stock.eps}` : stock.eps],
+                  ["Dividend Yield", stock.divYield],
+                  ["52W High", typeof stock.week52High === "number" ? `$${stock.week52High}` : stock.week52High],
+                  ["52W Low", typeof stock.week52Low === "number" ? `$${stock.week52Low}` : stock.week52Low],
+                  ["Beta", stock.beta],
+                  ["Vol. Medio", stock.avgVolume],
+                ].map(([label, value]) => (
+                  <div key={label} style={{ background:T.card, borderRadius:12, padding:"14px",
+                    border:`1px solid ${T.border}` }}>
+                    <div style={{ color:T.muted2, fontSize:10, fontWeight:700,
+                      textTransform:"uppercase", letterSpacing:"0.08em", marginBottom:6 }}>{label}</div>
+                    <div style={{ fontWeight:800, fontSize:16 }}>{value ?? "N/A"}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* 52w range bar */}
+              <div style={{ background:T.card, borderRadius:14, padding:"16px 20px",
+                border:`1px solid ${T.border}`, marginBottom:16 }}>
+                <div style={{ display:"flex", justifyContent:"space-between", marginBottom:8 }}>
+                  <span style={{ color:T.muted2, fontSize:11 }}>Min 52 settimane</span>
+                  <span style={{ color:T.muted2, fontSize:11 }}>Max 52 settimane</span>
+                </div>
+                <div style={{ position:"relative", height:6, background:T.border, borderRadius:3 }}>
+                  <div style={{ position:"absolute", left:0, top:0, height:6,
+                    width:`${plPct}%`, borderRadius:3,
+                    background:`linear-gradient(90deg,${T.red},${T.yellow},${T.green})` }}/>
+                  <div style={{ position:"absolute", top:-4, left:`${plPct}%`,
+                    transform:"translateX(-50%)",
+                    width:14, height:14, borderRadius:"50%",
+                    background:T.accent, border:`2px solid ${T.surface}`,
+                    boxShadow:`0 0 6px ${T.accent}` }}/>
+                </div>
+                <div style={{ display:"flex", justifyContent:"space-between", marginTop:8 }}>
+                  <span style={{ fontWeight:700, fontSize:13 }}>{typeof stock.week52Low==="number"?`$${stock.week52Low}`:stock.week52Low}</span>
+                  <span style={{ color:T.accent, fontWeight:800, fontSize:13 }}>
+                    ${typeof stock.price==="number"?stock.price.toLocaleString("it-IT"):stock.price} attuale
+                  </span>
+                  <span style={{ fontWeight:700, fontSize:13 }}>{typeof stock.week52High==="number"?`$${stock.week52High}`:stock.week52High}</span>
+                </div>
+              </div>
+
+              {/* analyst rating */}
+              {stock.analystRating && stock.analystRating !== "N/A" && (
+                <div style={{ background:`${T.green}12`, borderRadius:14, padding:"16px 20px",
+                  border:`1px solid ${T.green}33`, display:"flex", alignItems:"center", gap:16 }}>
+                  <div style={{ fontSize:32 }}>
+                    {stock.analystRating.includes("Strong") ? "🏆" : "👍"}
+                  </div>
+                  <div>
+                    <div style={{ color:T.green, fontWeight:800, fontSize:16 }}>
+                      Consensus Analisti: {stock.analystRating}
+                    </div>
+                    <div style={{ color:T.muted2, fontSize:12, marginTop:2 }}>
+                      Target medio: ${stock.analystTarget} •
+                      Upside atteso: {typeof stock.price==="number" && typeof stock.analystTarget==="number"
+                        ? `+${((stock.analystTarget-stock.price)/stock.price*100).toFixed(1)}%`
+                        : "N/A"}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── FONDAMENTALI ── */}
+          {activeTab==="fondamentali" && (
+            <div>
+              {/* scores */}
+              {!isETF && !isCrypto && stock.moatScore && (
+                <div>
+                  <div style={{ fontWeight:700, fontSize:14, marginBottom:12 }}>Punteggi Qualita</div>
+                  <div style={{ display:"flex", gap:12, marginBottom:24 }}>
+                    <ScoreGauge label="Moat / Vantaggio" value={stock.moatScore} color={T.accent}/>
+                    <ScoreGauge label="Salute Finanziaria" value={stock.financialScore} color={T.green}/>
+                    <ScoreGauge label="Crescita" value={stock.growthScore} color={T.purple}/>
+                  </div>
+                </div>
+              )}
+
+              {/* income metrics */}
+              {!isETF && !isCrypto && (
+                <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, marginBottom:20 }}>
+                  <div style={{ background:T.card, borderRadius:14, padding:"18px", border:`1px solid ${T.border}` }}>
+                    <div style={{ fontWeight:700, fontSize:13, marginBottom:14, color:T.accent }}>Redditivita</div>
+                    {[
+                      ["Gross Margin", stock.grossMargin],
+                      ["Operating Margin", stock.operatingMargin],
+                      ["Net Margin", stock.netMargin],
+                      ["ROE", stock.roe],
+                      ["ROA", stock.roa],
+                    ].map(([k,v])=>(
+                      <div key={k} style={{ display:"flex", justifyContent:"space-between",
+                        padding:"7px 0", borderBottom:`1px solid ${T.border}` }}>
+                        <span style={{ color:T.muted2, fontSize:12 }}>{k}</span>
+                        <span style={{ fontWeight:700, fontSize:12, color:T.green }}>{v}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ background:T.card, borderRadius:14, padding:"18px", border:`1px solid ${T.border}` }}>
+                    <div style={{ fontWeight:700, fontSize:13, marginBottom:14, color:T.purple }}>Crescita & Debito</div>
+                    {[
+                      ["Crescita Revenue", stock.revenueGrowth],
+                      ["Crescita EPS", stock.epsGrowth],
+                      ["Debt/Equity", stock.debtEquity],
+                      ["Current Ratio", stock.currentRatio],
+                      ["Forward P/E", stock.forwardPE],
+                    ].map(([k,v])=>(
+                      <div key={k} style={{ display:"flex", justifyContent:"space-between",
+                        padding:"7px 0", borderBottom:`1px solid ${T.border}` }}>
+                        <span style={{ color:T.muted2, fontSize:12 }}>{k}</span>
+                        <span style={{ fontWeight:700, fontSize:12 }}>{v}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* dividends */}
+              <div style={{ background:T.card, borderRadius:14, padding:"18px", border:`1px solid ${T.border}` }}>
+                <div style={{ fontWeight:700, fontSize:13, marginBottom:14, color:T.yellow }}>Dividendi</div>
+                <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:12 }}>
+                  {[
+                    ["Yield", stock.divYield],
+                    ["Dividendo Ann.", stock.annualDiv ? `$${stock.annualDiv}` : "N/A"],
+                    ["Payout Ratio", stock.payoutRatio],
+                    ["Ex-Div Date", stock.exDivDate],
+                  ].map(([k,v])=>(
+                    <div key={k} style={{ textAlign:"center" }}>
+                      <div style={{ color:T.muted2, fontSize:10, marginBottom:4 }}>{k}</div>
+                      <div style={{ fontWeight:800, fontSize:15, color:v==="N/A"?T.muted2:T.yellow }}>{v}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── GRAFICO ── */}
+          {activeTab==="grafico" && (
+            <div>
+              <div style={{ fontWeight:700, fontSize:14, marginBottom:16 }}>Andamento Prezzo (12 mesi)</div>
+              <ResponsiveContainer width="100%" height={260}>
+                <AreaChart data={priceData} margin={{top:5,right:10,left:0,bottom:0}}>
+                  <defs>
+                    <linearGradient id="mg" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={T.accent} stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor={T.accent} stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke={T.border} vertical={false}/>
+                  <XAxis dataKey="date" tick={{fill:T.muted,fontSize:11}} axisLine={false} tickLine={false}/>
+                  <YAxis tick={{fill:T.muted,fontSize:11}} axisLine={false} tickLine={false}
+                    tickFormatter={v=>v>=1000?`${(v/1000).toFixed(0)}k`:v} width={48}/>
+                  <Tooltip contentStyle={{background:T.card,border:`1px solid ${T.border2}`,borderRadius:10}}
+                    formatter={v=>[`${stock.currency==="USD"?"$":"€"}${v.toLocaleString("it-IT")}`,""]}/>
+                  <Area type="monotone" dataKey="value" stroke={T.accent} strokeWidth={2.5}
+                    fill="url(#mg)" dot={false}/>
+                </AreaChart>
+              </ResponsiveContainer>
+
+              {/* revenue/price bar chart */}
+              <div style={{ fontWeight:700, fontSize:14, margin:"24px 0 16px" }}>
+                {isETF || isCrypto ? "Andamento Storico NAV/Prezzo" : "Revenue vs Utile Netto (miliardi)"}
+              </div>
+              <ResponsiveContainer width="100%" height={180}>
+                <BarChart data={stock.years.map((y,i)=>({
+                  year:y,
+                  revenue: isETF||isCrypto ? stock.revenue[i] : stock.revenue[i],
+                  earnings: isETF||isCrypto ? null : stock.earnings[i]
+                }))} margin={{top:0,right:10,left:0,bottom:0}}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={T.border} vertical={false}/>
+                  <XAxis dataKey="year" tick={{fill:T.muted,fontSize:11}} axisLine={false} tickLine={false}/>
+                  <YAxis tick={{fill:T.muted,fontSize:11}} axisLine={false} tickLine={false} width={38}/>
+                  <Tooltip contentStyle={{background:T.card,border:`1px solid ${T.border2}`,borderRadius:10}}/>
+                  <Bar dataKey="revenue" fill={T.accent} radius={[4,4,0,0]}
+                    name={isETF||isCrypto?"Prezzo":"Revenue ($B)"}/>
+                  {!isETF && !isCrypto && (
+                    <Bar dataKey="earnings" fill={T.green} radius={[4,4,0,0]} name="Utile ($B)"/>
+                  )}
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
+          {/* ── VALUTAZIONE ── */}
+          {activeTab==="valutazione" && (
+            <div>
+              {stock.fairValue && stock.fairValue !== "N/A" ? (
+                <div>
+                  <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:14, marginBottom:20 }}>
+                    {[
+                      { label:"Prezzo Attuale", value:`$${stock.price}`, color:T.text },
+                      { label:"Fair Value (DCF)", value:`$${stock.fairValue}`, color:T.accent },
+                      { label:"Target Analisti", value:`$${stock.analystTarget}`, color:T.green },
+                    ].map(item=>(
+                      <div key={item.label} style={{ background:T.card, borderRadius:14,
+                        padding:"20px", border:`1px solid ${T.border}`, textAlign:"center" }}>
+                        <div style={{ color:T.muted2, fontSize:11, fontWeight:700,
+                          textTransform:"uppercase", letterSpacing:"0.08em", marginBottom:10 }}>{item.label}</div>
+                        <div style={{ color:item.color, fontWeight:900, fontSize:28 }}>{item.value}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* upside/downside */}
+                  {(() => {
+                    const diff = ((stock.fairValue - stock.price) / stock.price * 100);
+                    const isUnder = diff > 0;
+                    return (
+                      <div style={{ background: isUnder?`${T.green}12`:`${T.red}12`,
+                        border:`1px solid ${isUnder?T.green:T.red}33`,
+                        borderRadius:16, padding:"20px 24px", marginBottom:20,
+                        display:"flex", alignItems:"center", gap:16 }}>
+                        <div style={{ fontSize:40 }}>{isUnder?"💎":"⚠️"}</div>
+                        <div>
+                          <div style={{ color:isUnder?T.green:T.red, fontWeight:900, fontSize:20 }}>
+                            {isUnder?"Sottovalutato":"Sopravvalutato"} del {Math.abs(diff).toFixed(1)}%
+                          </div>
+                          <div style={{ color:T.muted2, fontSize:13, marginTop:4 }}>
+                            {isUnder
+                              ? `Il prezzo attuale e ${diff.toFixed(1)}% sotto il fair value stimato. Potenziale upside interessante.`
+                              : `Il prezzo attuale e ${Math.abs(diff).toFixed(1)}% sopra il fair value. Valutazione premium.`}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  <div style={{ background:T.card, borderRadius:14, padding:"18px", border:`1px solid ${T.border}` }}>
+                    <div style={{ fontWeight:700, fontSize:13, marginBottom:14 }}>Multipli di Valutazione</div>
+                    {[
+                      ["P/E Ratio (TTM)", stock.peRatio, "x"],
+                      ["Forward P/E", stock.forwardPE, "x"],
+                      ["PEG Ratio", stock.peRatio && stock.epsGrowth ? (stock.peRatio / parseFloat(stock.epsGrowth)).toFixed(2) : "N/A", ""],
+                      ["Dividend Yield", stock.divYield, ""],
+                      ["EPS (TTM)", stock.eps, "$"],
+                    ].map(([k,v,unit])=>(
+                      <div key={k} style={{ display:"flex", justifyContent:"space-between",
+                        alignItems:"center", padding:"8px 0", borderBottom:`1px solid ${T.border}` }}>
+                        <span style={{ color:T.muted2, fontSize:13 }}>{k}</span>
+                        <span style={{ fontWeight:800, fontSize:14 }}>
+                          {v && v!=="N/A" ? `${unit}${v}` : "N/A"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div style={{ textAlign:"center", padding:"40px 20px", color:T.muted2 }}>
+                  <div style={{ fontSize:48, marginBottom:16 }}>📊</div>
+                  <div style={{ fontSize:16, fontWeight:600 }}>Valutazione non disponibile</div>
+                  <div style={{ fontSize:13, marginTop:8 }}>
+                    Per {isETF ? "ETF" : "crypto"} non e disponibile una valutazione DCF tradizionale.
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function DashboardPage({ holdings, cryptoData, cryptoLoading, lastUpdated, refetch, isMobile=false }) {
   const [tf, setTf] = useState("1A");
   const [assetFilter, setAssetFilter] = useState("Tutti");
-  const [marketOpen] = useState(true);
-  const [countdown] = useState("02:41:15");
+  // ── REAL MARKET CLOCK ───────────────────────────────────────────────
+  const [marketClock, setMarketClock] = useState({ open:false, label:"", countdown:"", session:"" });
+
+  useState(() => {
+    function calcMarket() {
+      // NYSE: Mon-Fri 09:30-16:00 ET (UTC-4 in estate, UTC-5 in inverno)
+      const now = new Date();
+      const etOffset = isDST(now) ? -4 : -5;
+      const etNow = new Date(now.getTime() + (now.getTimezoneOffset() + etOffset*60) * 60000);
+      const day = etNow.getDay(); // 0=Sun,6=Sat
+      const h = etNow.getHours();
+      const m = etNow.getMinutes();
+      const s = etNow.getSeconds();
+      const totalMins = h * 60 + m;
+
+      const isWeekday = day >= 1 && day <= 5;
+      const openMins  = 9 * 60 + 30;   // 09:30
+      const closeMins = 16 * 60;         // 16:00
+      const preOpen   = 4 * 60;          // 04:00 pre-market
+      const afterClose= 20 * 60;         // 20:00 after-hours
+
+      let open = false, label = "", session = "", secsLeft = 0;
+
+      if (!isWeekday) {
+        // Weekend — find next Monday 09:30
+        const daysToMon = day === 0 ? 1 : 2;
+        secsLeft = daysToMon * 86400 - (totalMins * 60 + s) + openMins * 60;
+        label = "Mercato Chiuso";
+        session = "Riapre Lunedi 09:30 ET";
+      } else if (totalMins >= openMins && totalMins < closeMins) {
+        open = true;
+        secsLeft = (closeMins - totalMins) * 60 - s;
+        label = "Mercato Aperto";
+        session = "NYSE — Chiude 16:00 ET";
+      } else if (totalMins >= preOpen && totalMins < openMins) {
+        secsLeft = (openMins - totalMins) * 60 - s;
+        label = "Pre-Market";
+        session = "Apertura tra:";
+      } else if (totalMins >= closeMins && totalMins < afterClose) {
+        secsLeft = (afterClose - totalMins) * 60 - s;
+        label = "After Hours";
+        session = "NYSE — Fine AH tra:";
+      } else {
+        // After 20:00 — count to next open
+        const secsToMidnight = (24*60 - totalMins)*60 - s;
+        const secsNextOpen = secsToMidnight + openMins*60;
+        const daysAdd = day === 5 ? 3 : day === 4 ? 1 : 1;
+        secsLeft = day >= 5 ? daysAdd*86400*1000/1000 + openMins*60 : secsNextOpen;
+        label = "Mercato Chiuso";
+        session = "Riapre domani 09:30 ET";
+      }
+
+      const hh = Math.floor(secsLeft / 3600);
+      const mm = Math.floor((secsLeft % 3600) / 60);
+      const ss = secsLeft % 60;
+      const countdown = `${String(hh).padStart(2,"0")}:${String(mm).padStart(2,"0")}:${String(ss).padStart(2,"0")}`;
+
+      setMarketClock({ open, label, countdown, session });
+    }
+
+    function isDST(date) {
+      const jan = new Date(date.getFullYear(), 0, 1).getTimezoneOffset();
+      const jul = new Date(date.getFullYear(), 6, 1).getTimezoneOffset();
+      return date.getTimezoneOffset() < Math.max(jan, jul);
+    }
+
+    calcMarket();
+    const interval = setInterval(calcMarket, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const marketOpen = marketClock.open;
+  const countdown  = marketClock.countdown;
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [selectedStock, setSelectedStock] = useState(null);
+  const [showSearchDrop, setShowSearchDrop] = useState(false);
 
   const totalCurrent  = holdings.reduce((s,h) => s+h.current, 0);
   const totalInvested = holdings.reduce((s,h) => s+h.invested, 0);
@@ -643,32 +1261,104 @@ function DashboardPage({ holdings, cryptoData, cryptoLoading, lastUpdated, refet
           {/* search */}
           <div style={{ position:"relative" }}>
             <span style={{ position:"absolute", left:12, top:"50%", transform:"translateY(-50%)",
-              color:T.muted, fontSize:14 }}>🔍</span>
-            <input value={searchQuery} onChange={e=>setSearchQuery(e.target.value)}
+              color:T.muted, fontSize:14, zIndex:1 }}>🔍</span>
+            <input value={searchQuery}
+              onChange={e=>{
+                setSearchQuery(e.target.value);
+                const results = searchStocks(e.target.value);
+                setSearchResults(results);
+                setShowSearchDrop(e.target.value.length > 0);
+              }}
+              onFocus={()=>{ if(searchQuery) setShowSearchDrop(true); }}
+              onBlur={()=>setTimeout(()=>setShowSearchDrop(false),200)}
               placeholder="Cerca asset, stock, ETF..."
-              style={{ background:T.card, border:`1px solid ${T.border}`, borderRadius:12,
-                padding:"9px 14px 9px 36px", color:T.text, fontSize:13, width:240,
-                outline:"none" }}/>
-          </div>
-          {/* market status */}
-          <div style={{
-            background: marketOpen ? `${T.green}15` : `${T.red}15`,
-            border:`1px solid ${marketOpen?T.green:T.red}33`,
-            borderRadius:12, padding:"8px 16px",
-            display:"flex", alignItems:"center", gap:8
-          }}>
-            <div style={{ width:8,height:8,borderRadius:"50%",
-              background:marketOpen?T.green:T.red,
-              boxShadow:`0 0 8px ${marketOpen?T.green:T.red}` }}/>
-            <div>
-              <div style={{ color:marketOpen?T.green:T.red, fontWeight:700, fontSize:12 }}>
-                {marketOpen ? "Mercato Aperto" : "Mercato Chiuso"}
+              style={{ background:T.card, border:`1px solid ${showSearchDrop?T.accent:T.border}`,
+                borderRadius:12, padding:"9px 14px 9px 36px", color:T.text,
+                fontSize:13, width:260, outline:"none", transition:"border-color .15s" }}/>
+
+            {/* dropdown results */}
+            {showSearchDrop && searchResults.length > 0 && (
+              <div style={{
+                position:"absolute", top:"calc(100% + 6px)", left:0, right:0, zIndex:300,
+                background:T.card, border:`1px solid ${T.border2}`, borderRadius:14,
+                boxShadow:"0 16px 48px #000d", overflow:"hidden"
+              }}>
+                {searchResults.map(s=>(
+                  <div key={s.ticker}
+                    onMouseDown={()=>{ setSelectedStock(s); setShowSearchDrop(false); setSearchQuery(""); }}
+                    style={{ display:"flex", justifyContent:"space-between", alignItems:"center",
+                      padding:"11px 14px", cursor:"pointer", borderBottom:`1px solid ${T.border}`,
+                      transition:"background .1s" }}
+                    onMouseEnter={e=>e.currentTarget.style.background=T.surface}
+                    onMouseLeave={e=>e.currentTarget.style.background="transparent"}>
+                    <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                      <div style={{ width:32,height:32,borderRadius:8,
+                        background:`${T.accent}22`,display:"flex",alignItems:"center",
+                        justifyContent:"center",color:T.accent,fontWeight:900,fontSize:11 }}>
+                        {s.ticker.slice(0,3)}
+                      </div>
+                      <div>
+                        <div style={{ fontWeight:700, fontSize:13 }}>{s.ticker}</div>
+                        <div style={{ color:T.muted2, fontSize:11 }}>{s.name}</div>
+                      </div>
+                    </div>
+                    <div style={{ textAlign:"right" }}>
+                      <div style={{ fontWeight:700, fontSize:13 }}>
+                        {s.currency==="USD"?"$":"€"}{typeof s.price==="number"?s.price.toLocaleString("it-IT"):s.price}
+                      </div>
+                      <div style={{ color:clr(s.changePct), fontSize:11, fontWeight:700 }}>
+                        {s.changePct>=0?"+":""}{s.changePct}%
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div style={{ color:T.muted2, fontSize:10 }}>
-                {marketOpen ? `Chiude in ${countdown}` : "Apre domani 09:30"}
+            )}
+
+            {showSearchDrop && searchQuery.length > 0 && searchResults.length === 0 && (
+              <div style={{ position:"absolute", top:"calc(100% + 6px)", left:0, right:0, zIndex:300,
+                background:T.card, border:`1px solid ${T.border2}`, borderRadius:14,
+                padding:"16px", textAlign:"center", color:T.muted2, fontSize:13 }}>
+                Nessun risultato per "{searchQuery}"
               </div>
-            </div>
+            )}
           </div>
+
+          {/* stock modal */}
+          {selectedStock && <StockModal stock={selectedStock} onClose={()=>setSelectedStock(null)}/>}
+          {/* market status — live NYSE clock */}
+          {(() => {
+            const col = marketClock.label === "Mercato Aperto" ? T.green
+                      : marketClock.label === "Pre-Market" ? T.yellow
+                      : marketClock.label === "After Hours" ? T.orange
+                      : T.red;
+            return (
+              <div style={{
+                background:`${col}15`, border:`1px solid ${col}33`,
+                borderRadius:12, padding:"8px 16px",
+                display:"flex", alignItems:"center", gap:10
+              }}>
+                <div style={{ position:"relative", width:10, height:10, flexShrink:0 }}>
+                  <div style={{ width:10,height:10,borderRadius:"50%",
+                    background:col, boxShadow:`0 0 8px ${col}`,
+                    animation: marketClock.open ? "pulse 1.5s infinite" : "none" }}/>
+                </div>
+                <div>
+                  <div style={{ color:col, fontWeight:800, fontSize:12, whiteSpace:"nowrap" }}>
+                    {marketClock.label}
+                  </div>
+                  <div style={{ color:T.muted2, fontSize:10, display:"flex", gap:4, alignItems:"center" }}>
+                    <span>{marketClock.session}</span>
+                    {marketClock.countdown && (
+                      <span style={{ color:col, fontWeight:700, fontFamily:"monospace", fontSize:11 }}>
+                        {marketClock.countdown}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </div>
 
